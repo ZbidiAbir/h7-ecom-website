@@ -84,7 +84,7 @@ export default function ProductList({
                 {product.name}
               </h3>
               <div className="flex items-center gap-1.5">
-                <div className="flex text-amber-400 text-sm">
+                <div className="flex text-yellow-400 text-sm">
                   {"★".repeat(4)}
                   <span className="text-gray-300">★</span>
                 </div>
