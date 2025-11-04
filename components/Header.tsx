@@ -16,7 +16,7 @@ export default function Header({ isAdmin, cartCount, openCart }: HeaderProps) {
   const [showBanner, setShowBanner] = useState(true);
 
   return (
-    <header className="sticky top-0 z-50 border-b">
+    <header className="sticky top-0 z-50 ">
       {/* ✅ Bannière promo avec bouton Close */}
       {showBanner && (
         <div className="relative bg-black text-white text-sm text-center py-1">
@@ -36,7 +36,7 @@ export default function Header({ isAdmin, cartCount, openCart }: HeaderProps) {
       )}
 
       {/* Header principal */}
-      <div className="bg-transparent backdrop-blur-sm">
+      <div className="bg-transparent ">
         <div className="container mx-auto px-4 py-4 flex items-center justify-between">
           {/* Menu gauche */}
           <div className="flex items-center gap-4">
@@ -53,23 +53,23 @@ export default function Header({ isAdmin, cartCount, openCart }: HeaderProps) {
             href="/"
             className="flex items-center gap-3 hover:opacity-80 transition-opacity"
           >
-            <span className="text-xl md:text-2xl font-bold bg-gradient-to-r from-slate-900 to-slate-700 bg-clip-text text-transparent">
+            <span className="text-xl md:text-2xl font-bold bg-black bg-clip-text text-transparent">
               HASHSEVEN
             </span>
           </Link>
 
           {/* Menu droit */}
           <div className="flex items-center gap-4">
-            <button className="p-1 text-slate-700 hover:text-slate-900">
+            <button className="p-1 text-black">
               <User className="w-5 h-5" />
             </button>
             <button
               onClick={openCart}
-              className="relative flex items-center gap-1 text-slate-700 hover:text-slate-900"
+              className="relative flex items-center gap-1 text-black hover:text-slate-900"
             >
               <ShoppingCart className="w-5 h-5" />
               {cartCount > 0 && (
-                <span className="absolute -top-2 -right-2 bg-slate-900 text-white text-xs w-5 h-5 flex items-center justify-center rounded-full">
+                <span className="absolute -top-2 -right-2 bg-slate-900 text-black text-xs w-5 h-5 flex items-center justify-center rounded-full">
                   {cartCount}
                 </span>
               )}

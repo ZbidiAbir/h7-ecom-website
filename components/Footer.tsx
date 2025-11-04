@@ -12,23 +12,25 @@ const Footer: React.FC<FooterProps> = ({ isAdmin }) => {
   return (
     <footer className="bg-white border-t border-gray-200 p-8">
       {/* Newsletter Section */}
-      <div className="bg-black text-white rounded-xl mx-4 mt-10 p-12 flex flex-col md:flex-row justify-between items-center gap-6">
+      <div className="bg-black text-white  mx-4 mt-10 p-12 flex flex-col md:flex-row justify-between items-center gap-6">
         <h2 className="text-2xl md:text-3xl font-bold text-center md:text-left">
           STAY UP TO DATE ABOUT <br className="hidden md:block" />
           OUR LATEST OFFERS
         </h2>
-        <div className="flex flex-col sm:flex-row items-center gap-3 w-full max-w-md">
+        <div className="gap-3 w-full max-w-md">
           <div className="relative w-full">
             <Mail className="absolute left-3 top-3 text-gray-400" size={20} />
             <input
               type="email"
               placeholder="Enter your email address"
-              className="w-full pl-10 pr-4 py-2 rounded-full text-black focus:outline-none"
+              className="w-full pl-10 pr-4 py-2  text-black bg-white placeholder-gray-500 focus:outline-none"
             />
           </div>
-          <button className="bg-white text-black font-semibold px-6 py-2 rounded-full hover:bg-gray-100 transition">
-            Subscribe to Newsletter
-          </button>
+          <div className="pt-4 w-full">
+            <button className="bg-white text-black font-semibold px-6 py-2 hover:bg-gray-100 transition w-full">
+              Subscribe to Newsletter
+            </button>
+          </div>
         </div>
       </div>
 

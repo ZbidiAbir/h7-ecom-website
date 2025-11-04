@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useSession } from "next-auth/react";
-import { Loader2, PlusCircle } from "lucide-react";
+import { Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import CartDrawer from "@/components/CartDrawer";
 import { useCart } from "./hooks/useCart";
@@ -24,17 +24,20 @@ export default function Home() {
   const [isCartOpen, setIsCartOpen] = useState(false);
 
   const [products, setProducts] = useState<Product[]>([]);
+  const [jeansproducts, setJeansProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [mainImages, setMainImages] = useState<{ [key: string]: string }>({});
   const [addedProducts, setAddedProducts] = useState<{
     [key: string]: boolean;
   }>({});
+
   // types.ts
   interface Product {
     id: string;
     name: string;
     description: string;
+    discount: number;
     stock: number;
     price: number;
     images: (string | { url: string })[];
@@ -45,13 +48,14 @@ export default function Home() {
 
   useEffect(() => {
     fetchProducts();
+    fetchProductsJeans(); // ✅ Ajouté ici
   }, []);
 
   const fetchProducts = async () => {
     try {
       setError(null);
       setLoading(true);
-      const res = await fetch("/api/products");
+      const res = await fetch("/api/unique");
       if (!res.ok) throw new Error("Failed to fetch products");
       const data: Product[] = await res.json();
       setProducts(data);
@@ -64,12 +68,35 @@ export default function Home() {
             ? firstImage
             : firstImage?.url || "/placeholder.png";
       });
-      setMainImages(initialImages);
+      setMainImages((prev) => ({ ...prev, ...initialImages }));
     } catch (err) {
       console.error(err);
       setError("Unable to load products. Please try again later.");
     } finally {
       setLoading(false);
+    }
+  };
+
+  const fetchProductsJeans = async () => {
+    try {
+      setError(null);
+      const res = await fetch("/api/unique-jeans");
+      if (!res.ok) throw new Error("Failed to fetch jeans products");
+      const data: Product[] = await res.json();
+      setJeansProducts(data); // ✅ Corrigé ici
+
+      const initialImages: { [key: string]: string } = {};
+      data.forEach((p) => {
+        const firstImage = p.images[0];
+        initialImages[p.id] =
+          typeof firstImage === "string"
+            ? firstImage
+            : firstImage?.url || "/placeholder.png";
+      });
+      setMainImages((prev) => ({ ...prev, ...initialImages }));
+    } catch (err) {
+      console.error(err);
+      setError("Unable to load jeans products. Please try again later.");
     }
   };
 
@@ -83,24 +110,19 @@ export default function Home() {
       stock: product.stock,
       colors: product.colors
         ? product.colors.map((c) => (typeof c === "string" ? c : c.color))
-        : [], // <- si undefined, on met un tableau vide
+        : [],
     });
   };
 
   return (
-    <div className="bg-gradient-to-br from-slate-50 to-slate-100">
-      <HeaderWrapper /> {/* <-- absolute */}
+    <div className="bg-white">
+      <HeaderWrapper />
       <CartDrawer isOpen={isCartOpen} onClose={() => setIsCartOpen(false)} />
-      <Hero
-        imageUrl="/home/hero1.svg"
-        buttonText="Discover the collection"
-        verticalText="New Collection"
-      />
+      <Hero />
       <Features />
       <Sellers />
-      {/* Main */}
-      <main className="container mx-auto px-4 py-8 md:py-12">
-        <div className="max-w-6xl mx-auto">
+      <main className="px-4 py-8 md:py-12">
+        <div className="px-36">
           {loading ? (
             <div className="flex flex-col items-center justify-center py-16">
               <Loader2 className="w-8 h-8 animate-spin text-slate-400 mb-4" />
@@ -116,30 +138,44 @@ export default function Home() {
               </div>
             </div>
           ) : (
-            <ProductList
-              products={products}
-              mainImages={mainImages}
-              addedProducts={addedProducts}
-              handleAddToCart={handleAddToCart}
-              isAdmin={isAdmin}
-            />
+            <div>
+              {" "}
+              <h1 className="text-black text-center text-3xl font-bold py-8">
+                What we have for you
+              </h1>
+              <ProductList
+                products={products}
+                mainImages={mainImages}
+                addedProducts={addedProducts}
+                handleAddToCart={handleAddToCart}
+                isAdmin={isAdmin}
+              />
+            </div>
           )}
         </div>
       </main>
+
+      <About />
+      <MadeInTunisia />
       <AutoScrollBanner />
-      <MadeInTunisia
-        variant="elegant"
-        animation="glitch"
-        textColor="text-black"
-        lineColor="bg-gray-900"
-        size="xl"
-        delay={1000}
-        className="bg-gray-50"
-      />{" "}
+
+      {/* ✅ Section jeans maintenant fonctionnelle */}
+      <div className="px-36">
+        <h1 className="text-center font-bold text-4xl py-12">
+          Our jeans collection
+        </h1>
+        <ProductList
+          products={jeansproducts}
+          mainImages={mainImages}
+          addedProducts={addedProducts}
+          handleAddToCart={handleAddToCart}
+          isAdmin={isAdmin}
+        />
+      </div>
+
       <Standard />
       <ShippingSection />
       <Values />
-      <About />
     </div>
   );
 }

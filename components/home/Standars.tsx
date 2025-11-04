@@ -57,7 +57,7 @@ const Standard = () => {
       {/* Grid Pattern Overlay */}
       <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.02)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.02)_1px,transparent_1px)] bg-[size:64px_64px] [mask-image:radial-gradient(ellipse_80%_50%_at_50%_50%,black,transparent)]"></div>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full relative z-10">
+      <div className=" px-4  sm:px-6 lg:px-36 w-full relative z-10">
         <div className="flex flex-col lg:flex-row items-center justify-between gap-12 lg:gap-20">
           {/* Text Content - Left Side */}
           <div className="lg:w-1/2 text-white">
@@ -93,16 +93,7 @@ const Standard = () => {
                   ? "translate-y-0 opacity-100"
                   : "translate-y-10 opacity-0"
               }`}
-            >
-              {features.map((feature, index) => (
-                <div key={index} className="flex items-center space-x-3 group">
-                  <div className="w-2 h-2 bg-gray-400 rounded-full group-hover:bg-white transition-all duration-300 group-hover:scale-125"></div>
-                  <span className="text-gray-400 text-sm font-medium group-hover:text-white transition-colors duration-300 tracking-wide">
-                    {feature}
-                  </span>
-                </div>
-              ))}
-            </div>
+            ></div>
 
             {/* Description Text with Staggered Animation */}
             <div className="space-y-6 mb-12">
@@ -142,7 +133,7 @@ const Standard = () => {
               }`}
             >
               {/* Main Image Container */}
-              <div className="relative w-full h-full rounded-2xl overflow-hidden group">
+              <div className="relative w-full h-full  overflow-hidden group">
                 {/* Background Gradient Fallback */}
 
                 {/* Image with Loading State */}

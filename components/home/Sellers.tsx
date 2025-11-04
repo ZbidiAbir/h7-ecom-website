@@ -29,18 +29,13 @@ const SLIDES: Slide[] = [
   },
   {
     id: 2,
-    images: ["/home/s1.png", "/home/s2.png"],
+    images: ["/s3.png", "/s4.png"],
     alt: ["Casual wear look 1", "Casual wear look 2"],
   },
   {
     id: 3,
-    images: ["/home/s1.png", "/home/s2.png"],
+    images: ["/s5.png", "/s6.png"],
     alt: ["Evening collection look 1", "Evening collection look 2"],
-  },
-  {
-    id: 4,
-    images: ["/home/s1.png", "/home/s2.png"],
-    alt: ["Limited edition look 1", "Limited edition look 2"],
   },
 ];
 
@@ -79,7 +74,7 @@ const SlideContent = memo(({ slide, isActive, direction }: SlideProps) => {
               {/* Loading Overlay */}
               {imagesLoaded < totalImages && (
                 <div className="absolute inset-0 bg-gray-900/50 flex items-center justify-center z-10">
-                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-white"></div>
+                  <div className="animate-spin  h-8 w-8 border-b-2 border-white"></div>
                 </div>
               )}
 
@@ -100,18 +95,9 @@ const SlideContent = memo(({ slide, isActive, direction }: SlideProps) => {
               <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -skew-x-12 transform translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000" />
 
               {/* Hover Badge */}
-              <h2 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-6 tracking-tight">
-                Best Sellers
-                <span className="block text-transparent bg-gradient-to-r from-amber-400 via-orange-500 to-red-500 bg-clip-text">
-                  Lookbook
-                </span>
-              </h2>
             </div>
 
             {/* Floating Element */}
-            <div className="absolute -bottom-2 -right-2 w-6 h-6 bg-gradient-to-br from-gray-400 to-gray-500 rounded-full flex items-center justify-center transform scale-0 group-hover:scale-100 transition-transform duration-300">
-              <Sparkles size={12} className="text-white" />
-            </div>
           </div>
         ))}
       </div>
@@ -202,7 +188,7 @@ export default function BestSellersLookbook() {
 
   return (
     <section
-      className="bg-gradient-to-b from-black via-gray-900 to-black text-white py-20 px-4 sm:px-6 lg:px-8 relative overflow-hidden"
+      className="bg-black text-white py-20 px-4 sm:px-6 lg:px-8 relative overflow-hidden"
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
     >
@@ -216,13 +202,8 @@ export default function BestSellersLookbook() {
         {/* Header Section */}
         <div className="text-center mb-16">
           <h2 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-6 tracking-tight">
-            Best Sellers
+            Best sellers lookbook of the month{" "}
           </h2>
-
-          <p className="text-xl text-gray-300 max-w-2xl mx-auto leading-relaxed">
-            Discover our most loved pieces of the month. Curated style for the
-            modern individual.
-          </p>
         </div>
 
         {/* Main Carousel */}
@@ -262,52 +243,6 @@ export default function BestSellersLookbook() {
           >
             <ChevronRight size={32} />
           </button>
-        </div>
-
-        {/* Controls Section */}
-        <div className="flex flex-col sm:flex-row items-center justify-between gap-6 mt-12 pt-8 border-t border-white/10">
-          {/* Progress Bar */}
-          <div className="flex-1 max-w-2xl">
-            <div className="flex items-center gap-4 mb-3">
-              <span className="text-sm font-medium text-gray-300">
-                {String(current + 1).padStart(2, "0")} /{" "}
-                {String(SLIDES.length).padStart(2, "0")}
-              </span>
-              <div className="flex-1 bg-white/10 rounded-full h-2 overflow-hidden">
-                <div
-                  className="bg-gradient-to-r from-gray-400 to-gray-500 h-full rounded-full transition-all duration-300 ease-out"
-                  style={{ width: `${progress}%` }}
-                />
-              </div>
-            </div>
-          </div>
-
-          {/* Auto-play Toggle */}
-          <button
-            onClick={toggleAutoPlay}
-            className="flex items-center gap-2 bg-white/5 hover:bg-white/10 backdrop-blur-sm border border-white/10 text-white px-4 py-2 rounded-full transition-all duration-300 hover:scale-105"
-          >
-            {isAutoPlaying ? <Pause size={16} /> : <Play size={16} />}
-            <span className="text-sm font-medium">
-              {isAutoPlaying ? "Pause" : "Play"}
-            </span>
-          </button>
-
-          {/* Slide Indicators */}
-          <div className="flex items-center gap-3">
-            {SLIDES.map((_, index) => (
-              <button
-                key={index}
-                onClick={() => goToSlide(index)}
-                className={`w-3 h-3 rounded-full transition-all duration-300 ${
-                  index === current
-                    ? "bg-gray-400 scale-125"
-                    : "bg-white/30 hover:bg-white/50"
-                }`}
-                aria-label={`Go to slide ${index + 1}`}
-              />
-            ))}
-          </div>
         </div>
       </div>
 

@@ -50,7 +50,7 @@ const About = () => {
       {/* Geometric Pattern Overlay */}
       <div className="absolute inset-0 bg-[linear-gradient(30deg,rgba(255,255,255,0.03)_0%,transparent_50%),linear-gradient(-30deg,rgba(255,255,255,0.02)_0%,transparent_50%)] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_50%,black,transparent)]"></div>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full relative z-10">
+      <div className="  px-4 sm:px-6 lg:px-24 w-full relative z-10">
         <div className="flex flex-col lg:flex-row items-center justify-between gap-12 lg:gap-20">
           {/* Enhanced Image Section - Left Side */}
           <div className="lg:w-1/2 flex justify-center">
@@ -62,7 +62,7 @@ const About = () => {
               }`}
             >
               {/* Main Image Container */}
-              <div className="relative rounded-2xl overflow-hidden group">
+              <div className="relative  overflow-hidden group">
                 {/* Background Layers */}
                 <div className="absolute inset-0 bg-gradient-to-br from-gray-900 via-gray-800 to-black rounded-2xl"></div>
                 <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-black/30 rounded-2xl"></div>

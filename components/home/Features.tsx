@@ -20,11 +20,11 @@ const Features = () => {
   ];
 
   return (
-    <div className=" mx-auto px-4 sm:px-6 lg:px-8 py-12 bg-white">
+    <div className=" mx-auto px-4 sm:px-6 lg:px-36 py-12 bg-white">
       <h2 className="text-3xl md:text-4xl font-bold text-center text-gray-900 ">
         Our Features
       </h2>
-      <p className="text-center text-xl py-8">
+      <p className="text-center text-xl py-8 text-black">
         Own Your Style. Live Hashseven.
       </p>
 
@@ -32,9 +32,9 @@ const Features = () => {
         {features.map((feature) => (
           <div
             key={feature.id}
-            className="bg-white  p-6 text-center  transition-shadow duration-300 flex flex-col"
+            className="bg-white  p-6 text-center  transition-shadow duration-300 flex flex-col "
           >
-            <div className="flex justify-center items-center mb-4 flex-1">
+            <div className="flex justify-center items-center mb-4 flex-1 bordered border-black border">
               <img
                 src={feature.image}
                 alt={feature.title}

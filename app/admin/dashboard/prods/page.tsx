@@ -135,11 +135,6 @@ export default function ProductsTable() {
           <span className="font-medium text-foreground">
             {row.getValue("name")}
           </span>
-          {row.original.description && (
-            <span className="text-xs text-muted-foreground line-clamp-1">
-              {row.original.description}
-            </span>
-          )}
         </div>
       ),
     },

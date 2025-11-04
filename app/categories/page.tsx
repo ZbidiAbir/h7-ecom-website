@@ -11,6 +11,7 @@ import {
 } from "lucide-react";
 import { Slider } from "@/components/ui/slider";
 import HeaderWrapper from "@/components/HeaderWrapper";
+import { FiShoppingCart } from "react-icons/fi";
 
 // Composant CategoryDropdown
 interface Category {
@@ -146,6 +147,27 @@ const getAvailableSizes = (items: any[], categories: Category[] = []) => {
   return Array.from(sizes).sort();
 };
 
+// Fonction pour obtenir les tailles de la catégorie sélectionnée
+const getCategorySizes = (selectedCategory: Category | null): string[] => {
+  if (!selectedCategory) return [];
+
+  const sizes = new Set<string>();
+
+  // Ajouter les tailles de la catégorie principale
+  selectedCategory.sizes?.forEach((sizeObj) => {
+    if (sizeObj.size) sizes.add(sizeObj.size);
+  });
+
+  // Ajouter les tailles des sous-catégories
+  selectedCategory.subcategories?.forEach((sub) => {
+    sub.sizes?.forEach((sizeObj) => {
+      if (sizeObj.size) sizes.add(sizeObj.size);
+    });
+  });
+
+  return Array.from(sizes).sort();
+};
+
 // Composant principal
 export default function CombinedCategoriesPage() {
   const [categories, setCategories] = useState<Category[]>([]);
@@ -170,7 +192,19 @@ export default function CombinedCategoriesPage() {
 
   // États pour la pagination
   const [currentPage, setCurrentPage] = useState(1);
-  const [itemsPerPage, setItemsPerPage] = useState(12);
+  const [itemsPerPage, setItemsPerPage] = useState(8);
+
+  // Fonction pour obtenir les tailles disponibles basées sur le contexte
+  // Fonction pour obtenir les tailles disponibles basées sur le contexte
+  const getContextualSizes = (): string[] => {
+    // Si une catégorie est sélectionnée, utiliser SES tailles seulement
+    if (selectedCategory) {
+      return getCategorySizes(selectedCategory);
+    }
+
+    // Si aucune catégorie n'est sélectionnée, ne retourner AUCUNE taille
+    return [];
+  };
 
   // Fonction pour obtenir les produits paginés
   const getPaginatedProducts = () => {
@@ -265,8 +299,8 @@ export default function CombinedCategoriesPage() {
       // Filtre par tailles
       if (selectedSizes.length > 0) {
         const productSizes = [
-          ...(product.sizes?.map((s: any) => s.size) || []),
-          ...(product.category?.sizes?.map((s: any) => s.size) || []),
+          ...product.sizes?.map((s: any) => s.size),
+          ...product.category?.sizes?.map((s: any) => s.size),
         ];
         const hasSelectedSize = selectedSizes.some((size) =>
           productSizes.includes(size)
@@ -508,8 +542,8 @@ export default function CombinedCategoriesPage() {
 
   if (loading.categories || loading.allProducts) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-gray-50 to-blue-50/30 py-8 px-4 sm:px-6 lg:px-8">
-        <div className=" mx-auto">
+      <div className="min-h-screen bg-white  py-8 px-4 sm:px-6 lg:px-36">
+        <div className=" ">
           <div className="text-center mb-12">
             <div className="h-8 bg-gray-200 rounded w-48 mx-auto mb-4 animate-pulse"></div>
             <div className="h-4 bg-gray-200 rounded w-96 mx-auto animate-pulse"></div>
@@ -517,7 +551,7 @@ export default function CombinedCategoriesPage() {
 
           <div className="flex gap-8">
             <div className="w-80 bg-white rounded-2xl shadow-lg p-6 animate-pulse">
-              <div className="h-6 bg-gray-200 rounded w-32 mb-6"></div>
+              <div className="h-6  rounded w-32 mb-6"></div>
               {[...Array(6)].map((_, index) => (
                 <div key={index} className="mb-4">
                   <div className="h-5 bg-gray-200 rounded w-full mb-2"></div>
@@ -550,7 +584,7 @@ export default function CombinedCategoriesPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-blue-50/30 py-8 px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-white py-8 px-4 sm:px-6 lg:px-24">
       <div className=" mx-auto">
         {/* Header */}
         <HeaderWrapper />
@@ -562,7 +596,7 @@ export default function CombinedCategoriesPage() {
               onClick={() => window.location.reload()}
               className="mt-3 bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition-colors"
             >
-              Réessayer
+              Reload
             </button>
           </div>
         )}
@@ -576,7 +610,7 @@ export default function CombinedCategoriesPage() {
                 htmlFor="category-select"
                 className="block text-sm font-medium text-gray-700 mb-2"
               >
-                Filtrer par catégorie
+                Filter by category
               </label>
               <select
                 id="category-select"
@@ -704,12 +738,12 @@ export default function CombinedCategoriesPage() {
                 </div>
               )}
 
-              {/* Filtre par tailles */}
-              {availableSizes.length > 0 && (
+              {/* Filtre par tailles - AFFICHER UNIQUEMENT POUR CATÉGORIE SÉLECTIONNÉE */}
+              {selectedCategory && getContextualSizes().length > 0 && (
                 <div className="p-6 border-b border-gray-100">
                   <h3 className="font-semibold text-gray-800 mb-4">Sizes</h3>
                   <div className="flex flex-wrap gap-2">
-                    {availableSizes.map((size) => (
+                    {getContextualSizes().map((size) => (
                       <label
                         key={size}
                         className="flex items-center cursor-pointer group"
@@ -836,7 +870,8 @@ export default function CombinedCategoriesPage() {
                     <Link
                       key={product.uniqueId || product.id}
                       href={`/products/${product.id}`}
-                      className="group relative bg-white rounded-2xl shadow-sm hover:shadow-lg transition-all duration-300 overflow-hidden border border-gray-100 hover:border-gray-200"
+                      className="group relative bg-white 
+                        transition-all duration-300 overflow-hidden border border-gray-100 hover:border-gray-200"
                     >
                       {/* Image container */}
                       <div className="relative h-72 w-full overflow-hidden">
@@ -878,8 +913,8 @@ export default function CombinedCategoriesPage() {
 
                         {/* Badge de promotion */}
                         {product.discount > 0 && (
-                          <div className="absolute top-3 left-3">
-                            <span className="bg-red-500 text-white text-xs font-bold px-2.5 py-1 rounded-full">
+                          <div className="absolute ">
+                            <span className="bg-black text-white text-xs font-bold px-2.5 py-1">
                               -{product.discount}%
                             </span>
                           </div>
@@ -925,38 +960,6 @@ export default function CombinedCategoriesPage() {
                           </div>
                         </div>
 
-                        {/* Tailles */}
-                        {(product?.sizes?.length > 0 ||
-                          product?.category?.sizes?.length > 0) && (
-                          <div className="flex items-center gap-1 flex-wrap">
-                            {[
-                              ...(product?.sizes || []),
-                              ...(product?.category?.sizes || []),
-                            ]
-                              .slice(0, 4)
-                              .map((sizeObj, index) => (
-                                <span
-                                  key={index}
-                                  className="text-xs bg-gray-50 text-gray-600 px-2 py-1 rounded border border-gray-200"
-                                >
-                                  {sizeObj.size}
-                                </span>
-                              ))}
-                            {[
-                              ...(product?.sizes || []),
-                              ...(product?.category?.sizes || []),
-                            ].length > 4 && (
-                              <span className="text-xs text-gray-400">
-                                +
-                                {[
-                                  ...(product?.sizes || []),
-                                  ...(product?.category?.sizes || []),
-                                ].length - 4}
-                              </span>
-                            )}
-                          </div>
-                        )}
-
                         {/* Prix et CTA */}
                         <div className="flex items-center justify-between pt-1">
                           <div className="flex items-baseline gap-2">
@@ -980,22 +983,11 @@ export default function CombinedCategoriesPage() {
                             )}
                           </div>
 
-                          {/* Bouton d'action */}
-                          <button className="opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-x-2 group-hover:translate-x-0 bg-gray-600 hover:bg-gray-700 text-white p-2 rounded-full shadow-sm">
-                            <svg
-                              className="w-4 h-4"
-                              fill="none"
-                              stroke="currentColor"
-                              viewBox="0 0 24 24"
-                            >
-                              <path
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                                strokeWidth={2}
-                                d="M9 5l7 7-7 7"
-                              />
-                            </svg>
-                          </button>
+                          <Link href={`/products/${product.id}`}>
+                            <button className="opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-x-2 group-hover:translate-x-0  text-black p-2 rounded-full shadow-sm">
+                              <FiShoppingCart />
+                            </button>
+                          </Link>
                         </div>
                       </div>
                     </Link>
@@ -1038,19 +1030,21 @@ export default function CombinedCategoriesPage() {
                   )}
 
                   {/* Pages numérotées */}
-                  {getPageNumbers().map((page) => (
-                    <button
-                      key={page}
-                      onClick={() => handlePageChange(page)}
-                      className={`px-3 py-2 rounded-lg text-sm font-medium border ${
-                        currentPage === page
-                          ? "bg-gray-600 text-white border-gray-600"
-                          : "text-gray-700 border-gray-300 hover:bg-gray-50"
-                      }`}
-                    >
-                      {page}
-                    </button>
-                  ))}
+                  <div className="flex items-center gap-2">
+                    {getPageNumbers().map((page) => (
+                      <button
+                        key={page}
+                        onClick={() => handlePageChange(page)}
+                        className={`px-3 py-2 rounded-lg text-sm font-medium border ${
+                          currentPage === page
+                            ? "bg-gray-600 text-white border-gray-600"
+                            : "text-gray-700 border-gray-300 hover:bg-gray-50"
+                        }`}
+                      >
+                        {page}
+                      </button>
+                    ))}
+                  </div>
 
                   {/* Dernière page */}
                   {getPageNumbers()[getPageNumbers().length - 1] <
