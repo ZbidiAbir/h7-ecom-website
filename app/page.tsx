@@ -1,103 +1,145 @@
-import Image from "next/image";
+"use client";
+
+import { useEffect, useState } from "react";
+import { useSession } from "next-auth/react";
+import { Loader2, PlusCircle } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import CartDrawer from "@/components/CartDrawer";
+import { useCart } from "./hooks/useCart";
+import ProductList from "@/components/ProductList";
+import Hero from "@/components/home/Hero";
+import HeaderWrapper from "@/components/HeaderWrapper";
+import Features from "@/components/home/Features";
+import Values from "@/components/home/Values";
+import Sellers from "@/components/home/Sellers";
+import Standard from "@/components/home/Standars";
+import ShippingSection from "@/components/home/ShippingSection";
+import AutoScrollBanner from "@/components/home/AutoScrollBanner";
+import MadeInTunisia from "@/components/home/MadeInTunisia";
+import About from "@/components/home/About";
 
 export default function Home() {
-  return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="list-inside list-decimal text-sm/6 text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
-          <li className="mb-2 tracking-[-.01em]">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] px-1 py-0.5 rounded font-[family-name:var(--font-geist-mono)] font-semibold">
-              app/page.tsx
-            </code>
-            .
-          </li>
-          <li className="tracking-[-.01em]">
-            Save and see your changes instantly.
-          </li>
-        </ol>
+  const { data: session } = useSession();
+  const { addToCart } = useCart();
+  const [isCartOpen, setIsCartOpen] = useState(false);
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:w-auto"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
+  const [products, setProducts] = useState<Product[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [mainImages, setMainImages] = useState<{ [key: string]: string }>({});
+  const [addedProducts, setAddedProducts] = useState<{
+    [key: string]: boolean;
+  }>({});
+  // types.ts
+  interface Product {
+    id: string;
+    name: string;
+    description: string;
+    stock: number;
+    price: number;
+    images: (string | { url: string })[];
+    colors: (string | { color: string })[];
+  }
+
+  const isAdmin = session?.user?.role === "ADMIN";
+
+  useEffect(() => {
+    fetchProducts();
+  }, []);
+
+  const fetchProducts = async () => {
+    try {
+      setError(null);
+      setLoading(true);
+      const res = await fetch("/api/products");
+      if (!res.ok) throw new Error("Failed to fetch products");
+      const data: Product[] = await res.json();
+      setProducts(data);
+
+      const initialImages: { [key: string]: string } = {};
+      data.forEach((p) => {
+        const firstImage = p.images[0];
+        initialImages[p.id] =
+          typeof firstImage === "string"
+            ? firstImage
+            : firstImage?.url || "/placeholder.png";
+      });
+      setMainImages(initialImages);
+    } catch (err) {
+      console.error(err);
+      setError("Unable to load products. Please try again later.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleAddToCart = (product: Product) => {
+    addToCart({
+      id: product.id,
+      name: product.name,
+      price: product.price,
+      image: mainImages[product.id] || "/placeholder.png",
+      quantity: 1,
+      stock: product.stock,
+      colors: product.colors
+        ? product.colors.map((c) => (typeof c === "string" ? c : c.color))
+        : [], // <- si undefined, on met un tableau vide
+    });
+  };
+
+  return (
+    <div className="bg-gradient-to-br from-slate-50 to-slate-100">
+      <HeaderWrapper /> {/* <-- absolute */}
+      <CartDrawer isOpen={isCartOpen} onClose={() => setIsCartOpen(false)} />
+      <Hero
+        imageUrl="/home/hero1.svg"
+        buttonText="Discover the collection"
+        verticalText="New Collection"
+      />
+      <Features />
+      <Sellers />
+      {/* Main */}
+      <main className="container mx-auto px-4 py-8 md:py-12">
+        <div className="max-w-6xl mx-auto">
+          {loading ? (
+            <div className="flex flex-col items-center justify-center py-16">
+              <Loader2 className="w-8 h-8 animate-spin text-slate-400 mb-4" />
+              <p className="text-slate-500">Loading products...</p>
+            </div>
+          ) : error ? (
+            <div className="text-center py-16">
+              <div className="bg-red-50 border border-red-200 rounded-lg p-6 max-w-md mx-auto">
+                <p className="text-red-600 mb-4">{error}</p>
+                <Button onClick={fetchProducts} variant="outline">
+                  Try Again
+                </Button>
+              </div>
+            </div>
+          ) : (
+            <ProductList
+              products={products}
+              mainImages={mainImages}
+              addedProducts={addedProducts}
+              handleAddToCart={handleAddToCart}
+              isAdmin={isAdmin}
             />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 w-full sm:w-auto md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
+          )}
         </div>
       </main>
-      <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
+      <AutoScrollBanner />
+      <MadeInTunisia
+        variant="elegant"
+        animation="glitch"
+        textColor="text-black"
+        lineColor="bg-gray-900"
+        size="xl"
+        delay={1000}
+        className="bg-gray-50"
+      />{" "}
+      <Standard />
+      <ShippingSection />
+      <Values />
+      <About />
     </div>
   );
 }

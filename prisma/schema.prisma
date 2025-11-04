@@ -1,0 +1,287 @@
+generator client {
+  provider = "prisma-client-js"
+  output   = "../app/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+///////////////////////////
+// Modèles d'authentification
+///////////////////////////
+
+model User {
+  id            String         @id @default(cuid())
+  name          String?
+  email         String?        @unique
+  emailVerified DateTime?
+  image         String?
+  role          String         @default("USER")
+  createdAt     DateTime       @default(now())
+  accounts      Account[]
+  sessions      Session[]
+  posts         Post[]
+  comments      Comment[]
+  likes         Like[]
+  products      Product[]
+  orders        Order[]
+  notifications Notification[] // 🔔 Relation avec les notifications
+}
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String?
+  access_token      String?
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String?
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
+
+///////////////////////////
+// Modèles de contenu
+///////////////////////////
+
+model Post {
+  id        String    @id @default(cuid())
+  title     String
+  content   String
+  published Boolean   @default(false)
+  authorId  String
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  author    User      @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  comments  Comment[]
+  likes     Like[]
+}
+
+model Comment {
+  id        String   @id @default(cuid())
+  content   String
+  postId    String
+  authorId  String
+  createdAt DateTime @default(now())
+  post      Post     @relation(fields: [postId], references: [id], onDelete: Cascade)
+  author    User     @relation(fields: [authorId], references: [id], onDelete: Cascade)
+}
+
+model Like {
+  id        String   @id @default(cuid())
+  postId    String
+  userId    String
+  createdAt DateTime @default(now())
+  post      Post     @relation(fields: [postId], references: [id], onDelete: Cascade)
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([postId, userId])
+}
+
+///////////////////////////
+// Modèles produits et catégories
+///////////////////////////
+model CategoryParent {
+  id        String   @id @default(cuid())
+  name      String   @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // 🔗 Relation avec Category
+  categories Category[]
+  Product    Product[]
+}
+
+model Category {
+  id        String   @id @default(cuid())
+  name      String   @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // 🔗 Nouvelle relation avec CategoryParent
+  parentId String?
+  parent   CategoryParent? @relation(fields: [parentId], references: [id], onDelete: SetNull)
+
+  products Product[]
+  images   CategoryImage[]
+  sizes    CategorySize[]
+  colors   CategoryColor[]
+}
+
+model CategoryImage {
+  id         String   @id @default(cuid())
+  url        String
+  categoryId String
+  createdAt  DateTime @default(now())
+
+  category Category @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+}
+
+model CategoryColor {
+  id         String @id @default(cuid())
+  color      String
+  categoryId String
+
+  category Category @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+}
+
+model CategorySize {
+  id         String @id @default(cuid())
+  size       String
+  categoryId String
+
+  category Category @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+}
+
+model Product {
+  id          String   @id @default(cuid())
+  name        String
+  description String?
+  price       Float
+  discount    Float?   @default(0)
+  inStock     Boolean  @default(true)
+  stock       Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  authorId String
+  author   User   @relation(fields: [authorId], references: [id], onDelete: Cascade)
+
+  categoryId String
+  category   Category @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+
+  // 🔹 Nouveau champ parentId lié à CategoryParent
+  parentId String?
+  parent   CategoryParent? @relation(fields: [parentId], references: [id])
+
+  images     ProductImage[]
+  colors     ProductColor[]
+  sizes      ProductSize[]
+  orderItems OrderItem[]
+}
+
+model ProductImage {
+  id        String   @id @default(cuid())
+  url       String
+  productId String
+  colorId   String?
+  createdAt DateTime @default(now())
+
+  product Product       @relation(fields: [productId], references: [id], onDelete: Cascade)
+  color   ProductColor? @relation(fields: [colorId], references: [id])
+}
+
+model ProductColor {
+  id        String @id @default(cuid())
+  color     String
+  productId String
+
+  product Product        @relation(fields: [productId], references: [id], onDelete: Cascade)
+  images  ProductImage[]
+}
+
+model ProductSize {
+  id        String @id @default(cuid())
+  size      String
+  productId String
+
+  product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+}
+
+///////////////////////////
+// Modèles pour les commandes
+///////////////////////////
+
+model Order {
+  id              String      @id @default(cuid())
+  userId          String
+  user            User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  status          String      @default("PENDING") // PENDING, PAID, SHIPPED, DELIVERED, CANCELLED
+  total           Float
+  shippingName    String?
+  shippingAddress String?
+  shippingCity    String?
+  shippingZip     String?
+  shippingCountry String?
+  paymentMethod   String?
+  paymentStatus   String?
+  phoneNumber     String? // ✅ Nouveau champ
+  additionalInfo  String? // ✅ Nouveau champ (ex : instructions de livraison)
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
+  items           OrderItem[]
+  invoices        Invoice[] // Relation avec les factures
+}
+
+model OrderItem {
+  id        String  @id @default(cuid())
+  orderId   String
+  productId String
+  quantity  Int     @default(1)
+  price     Float
+  product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+  order     Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
+
+  @@unique([orderId, productId])
+}
+
+///////////////////////////
+// Modèle pour les factures
+///////////////////////////
+
+model Invoice {
+  id            String    @id @default(cuid())
+  invoiceNumber String    @unique
+  orderId       String
+  order         Order     @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  issuedAt      DateTime  @default(now())
+  dueDate       DateTime?
+  total         Float
+  status        String    @default("UNPAID") // UNPAID, PAID, OVERDUE, CANCELLED
+  pdfUrl        String? // Lien vers le PDF de la facture
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+///////////////////////////
+// Modèle pour les notifications
+///////////////////////////
+
+model Notification {
+  id        String   @id @default(cuid())
+  title     String
+  message   String
+  type      String // ex: "ORDER", "COMMENT", "LIKE", "SYSTEM", etc.
+  read      Boolean  @default(false)
+  link      String? // 🔗 lien vers la page associée (ex: /orders/123)
+  relatedId String? // 🔗 ID lié (ex: id de la commande ou du post)
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+}
