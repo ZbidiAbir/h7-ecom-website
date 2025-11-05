@@ -60,32 +60,31 @@ export default function Header({ isAdmin, cartCount, openCart }: HeaderProps) {
 
           {/* Menu droit */}
           <div className="flex items-center gap-4">
-            <button className="p-1 text-black">
-              <User className="w-5 h-5" />
-            </button>
+            <AuthButton />
+
             <button
               onClick={openCart}
               className="relative flex items-center gap-1 text-black hover:text-slate-900"
             >
               <ShoppingCart className="w-5 h-5" />
               {cartCount > 0 && (
-                <span className="absolute -top-2 -right-2 bg-slate-900 text-black text-xs w-5 h-5 flex items-center justify-center rounded-full">
+                <span className="absolute -top-2 -right-2 bg-gray-300 text-black text-xs w-5 h-5 flex items-center justify-center rounded-full">
                   {cartCount}
                 </span>
               )}
             </button>
             {isAdmin && (
-              <Button asChild variant="outline" size="sm">
+              <Button asChild size="sm" className="bg-gray-300 text-gray-700">
                 <Link
                   href="/admin/dashboard"
-                  className="flex items-center gap-2"
+                  className="flex items-center gap-2 "
                 >
                   <PlusCircle className="w-4 h-4" />
                   Dashboard
                 </Link>
               </Button>
             )}
-            <AuthButton />
+            {/* <AuthButton /> */}
           </div>
         </div>
       </div>

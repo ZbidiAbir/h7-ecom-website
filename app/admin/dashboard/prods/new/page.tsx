@@ -17,7 +17,6 @@ import {
 } from "@/components/ui/select";
 import { Eye } from "lucide-react";
 import ImageUpload from "@/components/image-upload";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 
 interface CategoryColor {
   id: string;
@@ -77,7 +76,7 @@ export default function CreateProductPage() {
     fetchCategories();
   }, []);
 
-  // Lorsqu’on sélectionne une catégorie
+  // Lorsqu'on sélectionne une catégorie
   const handleCategoryChange = (value: string) => {
     const category = categories.find((cat) => cat.id === value) || null;
     setSelectedCategory(category);
@@ -97,15 +96,20 @@ export default function CreateProductPage() {
     setForm((prev) => ({ ...prev, [name]: value }));
   };
 
-  // Gestion des images
-  const handleAddImage = (url: string) =>
-    setForm((prev) => ({ ...prev, images: [...prev.images, url] }));
+  // CORRECTION : Gestion des images
+  const handleAddImage = (url: string) => {
+    setForm((prev) => ({
+      ...prev,
+      images: [...prev.images, url],
+    }));
+  };
 
-  const handleRemoveImage = (url: string) =>
+  const handleRemoveImage = (url: string) => {
     setForm((prev) => ({
       ...prev,
       images: prev.images.filter((img) => img !== url),
     }));
+  };
 
   // Soumission du formulaire
   const handleSubmit = async (e: FormEvent) => {
@@ -115,29 +119,38 @@ export default function CreateProductPage() {
       return;
     }
 
+    // Préparer les données pour l'API
+    const productData = {
+      name: form.name,
+      description: form.description,
+      price: parseFloat(form.price),
+      discount: form.discount ? parseFloat(form.discount) : 0,
+      categoryId: form.categoryId,
+      colors: form.color ? [form.color] : [],
+      sizes: form.size ? [form.size] : [],
+      inStock: form.inStock,
+      stock: form.stock,
+      images: form.images,
+    };
+
     setLoading(true);
     try {
       const response = await fetch("/api/products", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          name: form.name,
-          description: form.description,
-          price: parseFloat(form.price),
-          discount: form.discount ? parseFloat(form.discount) : 0,
-          categoryId: form.categoryId,
-          color: form.color,
-          size: form.size,
-          inStock: form.inStock,
-          stock: form.stock,
-          images: form.images,
-        }),
+        body: JSON.stringify(productData),
       });
 
-      if (response.ok) router.push("/admin/dashboard/prods");
-      else console.error(await response.json());
+      if (response.ok) {
+        router.push("/admin/dashboard/prods");
+      } else {
+        const errorData = await response.json();
+        console.error("Erreur API:", errorData);
+        alert(`Erreur: ${errorData.error || "Erreur lors de la création"}`);
+      }
     } catch (error) {
       console.error("Erreur création produit:", error);
+      alert("Erreur réseau lors de la création du produit");
     } finally {
       setLoading(false);
     }
@@ -228,6 +241,8 @@ export default function CreateProductPage() {
                       id="price"
                       name="price"
                       type="number"
+                      step="0.01"
+                      min="0"
                       value={form.price}
                       onChange={handleChange}
                       placeholder="Ex: 49.99"
@@ -240,6 +255,8 @@ export default function CreateProductPage() {
                       id="discount"
                       name="discount"
                       type="number"
+                      min="0"
+                      max="100"
                       value={form.discount}
                       onChange={handleChange}
                       placeholder="Ex: 10"
@@ -247,83 +264,92 @@ export default function CreateProductPage() {
                   </div>
                 </div>
 
-                {/* Couleurs (Radio Buttons) */}
+                {/* CORRECTION : Couleurs (Select) */}
                 {selectedCategory?.colors &&
                   selectedCategory.colors.length > 0 && (
                     <div className="space-y-2">
-                      <Label>Couleur</Label>
-                      <RadioGroup
+                      <Label htmlFor="color">Couleur</Label>
+                      <Select
                         value={form.color}
-                        onValueChange={(val) =>
-                          setForm((prev) => ({ ...prev, color: val }))
+                        onValueChange={(value) =>
+                          setForm((prev) => ({ ...prev, color: value }))
                         }
-                        className="flex flex-wrap gap-3 mt-2"
                       >
-                        {selectedCategory.colors.map((color) => (
-                          <div
-                            key={color.id}
-                            className="flex items-center space-x-2"
-                          >
-                            <RadioGroupItem
-                              value={color.color}
-                              id={color.color}
-                            />
-                            <Label htmlFor={color.color}>{color.color}</Label>
-                          </div>
-                        ))}
-                      </RadioGroup>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Sélectionner une couleur" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {selectedCategory.colors.map((color) => (
+                            <SelectItem key={color.id} value={color.color}>
+                              <div className="flex items-center gap-2">
+                                <div
+                                  className="w-4 h-4 rounded-full border"
+                                  style={{ backgroundColor: color.color }}
+                                />
+                                {color.color}
+                              </div>
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
                     </div>
                   )}
 
-                {/* Tailles (Radio Buttons) */}
+                {/* CORRECTION : Tailles (Select) */}
                 {selectedCategory?.sizes &&
                   selectedCategory.sizes.length > 0 && (
                     <div className="space-y-2">
-                      <Label>Taille</Label>
-                      <RadioGroup
+                      <Label htmlFor="size">Taille</Label>
+                      <Select
                         value={form.size}
-                        onValueChange={(val) =>
-                          setForm((prev) => ({ ...prev, size: val }))
+                        onValueChange={(value) =>
+                          setForm((prev) => ({ ...prev, size: value }))
                         }
-                        className="flex flex-wrap gap-3 mt-2"
                       >
-                        {selectedCategory.sizes.map((size) => (
-                          <div
-                            key={size.id}
-                            className="flex items-center space-x-2"
-                          >
-                            <RadioGroupItem value={size.size} id={size.size} />
-                            <Label htmlFor={size.size}>{size.size}</Label>
-                          </div>
-                        ))}
-                      </RadioGroup>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Sélectionner une taille" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {selectedCategory.sizes.map((size) => (
+                            <SelectItem key={size.id} value={size.size}>
+                              {size.size}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
                     </div>
                   )}
 
                 {/* Stock */}
                 <div className="flex items-center space-x-4">
-                  <Switch
-                    id="inStock"
-                    checked={form.inStock}
-                    onCheckedChange={(checked) =>
-                      setForm((prev) => ({ ...prev, inStock: checked }))
-                    }
-                  />
-                  <Label htmlFor="inStock">Disponible</Label>
-                  <Input
-                    id="stock"
-                    name="stock"
-                    type="number"
-                    min={0}
-                    value={form.stock}
-                    onChange={(e) =>
-                      setForm((prev) => ({
-                        ...prev,
-                        stock: parseInt(e.target.value) || 0,
-                      }))
-                    }
-                    placeholder="Quantité en stock"
-                  />
+                  <div className="flex items-center space-x-2">
+                    <Switch
+                      id="inStock"
+                      checked={form.inStock}
+                      onCheckedChange={(checked) =>
+                        setForm((prev) => ({ ...prev, inStock: checked }))
+                      }
+                    />
+                    <Label htmlFor="inStock">Disponible</Label>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <Label htmlFor="stock">Quantité:</Label>
+                    <Input
+                      id="stock"
+                      name="stock"
+                      type="number"
+                      min="0"
+                      value={form.stock}
+                      onChange={(e) =>
+                        setForm((prev) => ({
+                          ...prev,
+                          stock: parseInt(e.target.value) || 0,
+                        }))
+                      }
+                      placeholder="Quantité"
+                      className="w-32"
+                    />
+                  </div>
                 </div>
 
                 {/* Images */}
@@ -335,6 +361,9 @@ export default function CreateProductPage() {
                     onRemove={handleRemoveImage}
                     disabled={loading}
                   />
+                  <p className="text-sm text-gray-500">
+                    {form.images.length} image(s) sélectionnée(s)
+                  </p>
                 </div>
 
                 <Button type="submit" disabled={loading} className="w-full">
@@ -358,33 +387,79 @@ export default function CreateProductPage() {
                   <p className="text-muted-foreground">
                     {form.description || "Aucune description."}
                   </p>
-                  <p className="text-lg font-semibold">
-                    Prix :{" "}
-                    {form.discount
-                      ? `${(
-                          parseFloat(form.price) *
-                          (1 - parseFloat(form.discount) / 100)
-                        ).toFixed(2)} € (remisé)`
-                      : `${form.price || "0"} €`}
-                  </p>
-                  <p>Couleur : {form.color || "N/A"}</p>
-                  <p>Taille : {form.size || "N/A"}</p>
+
+                  <div className="space-y-2">
+                    <p className="text-lg font-semibold">
+                      {form.discount && parseFloat(form.discount) > 0 ? (
+                        <>
+                          <span className="line-through text-gray-500 mr-2">
+                            {parseFloat(form.price || "0").toFixed(2)} €
+                          </span>
+                          <span className="text-red-600">
+                            {(
+                              parseFloat(form.price || "0") *
+                              (1 - parseFloat(form.discount) / 100)
+                            ).toFixed(2)}{" "}
+                            €
+                          </span>
+                          <span className="ml-2 text-sm bg-red-100 text-red-800 px-2 py-1 rounded">
+                            -{form.discount}%
+                          </span>
+                        </>
+                      ) : (
+                        `${form.price || "0"} €`
+                      )}
+                    </p>
+                  </div>
+
                   <p>
-                    Stock : {form.stock} unités (
-                    {form.inStock ? "Disponible" : "Rupture"})
+                    <strong>Catégorie:</strong>{" "}
+                    {selectedCategory?.name || "N/A"}
                   </p>
 
-                  {form.images.length > 0 && (
+                  <div className="flex items-center gap-2">
+                    <strong>Couleur:</strong>
+                    {form.color ? (
+                      <div className="flex items-center gap-2">
+                        <div
+                          className="w-4 h-4 rounded-full border"
+                          style={{ backgroundColor: form.color }}
+                        />
+                        <span>{form.color}</span>
+                      </div>
+                    ) : (
+                      <span className="text-muted-foreground">N/A</span>
+                    )}
+                  </div>
+
+                  <p>
+                    <strong>Taille:</strong> {form.size || "N/A"}
+                  </p>
+
+                  <p>
+                    <strong>Stock:</strong> {form.stock} unités •{" "}
+                    <span
+                      className={
+                        form.inStock ? "text-green-600" : "text-red-600"
+                      }
+                    >
+                      {form.inStock ? "Disponible" : "Rupture"}
+                    </span>
+                  </p>
+
+                  {form.images.length > 0 ? (
                     <div className="grid grid-cols-2 gap-2 mt-4">
                       {form.images.map((url, i) => (
                         <img
-                          key={`${url}-${i}`}
+                          key={i}
                           src={url}
                           alt={`Image ${i + 1}`}
                           className="rounded-lg border object-cover w-full h-40"
                         />
                       ))}
                     </div>
+                  ) : (
+                    <p className="text-muted-foreground">Aucune image</p>
                   )}
                 </div>
               </CardContent>

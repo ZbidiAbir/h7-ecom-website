@@ -68,7 +68,7 @@ export default function ProductList({
               <img
                 src={mainImages[product.id] || "/placeholder.png"}
                 alt={product.name}
-                className="w-full h-64 object-cover rounded-lg"
+                className="w-full h-96 object-cover r"
               />
               {product.discount > 0 && (
                 <div className="absolute top-0 left-0">

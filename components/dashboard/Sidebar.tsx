@@ -124,12 +124,15 @@ export default function Sidebar() {
   const isChildActive = (href: string) => pathname.startsWith(href);
 
   return (
-    <aside className="fixed left-0 top-0 h-screen w-64 backdrop-blur-xl bg-white/70 dark:bg-gray-900/80 border-r border-gray-200/50 dark:border-gray-700/50 shadow-md flex flex-col z-30">
+    <aside className="fixed left-0 top-0 h-screen w-64 backdrop-blur-xl bg-white border-r border-gray-200/50 dark:border-gray text-black-700/50 shadow-md flex flex-col z-30">
       {/* Logo */}
-      <div className="flex items-center justify-center h-20 border-b border-gray-100/60 dark:border-gray-700/60 bg-gradient-to-r from-gray-50/60 to-white/70 dark:from-gray-800/70 dark:to-gray-900/70">
-        <h1 className="text-xl font-bold tracking-tight text-gray-900 dark:text-white">
-          HASH<span className="text-gray-600 dark:text-gray-400">SEVEN</span>
-        </h1>
+      <div className="flex items-center justify-center h-20 border-b border-gray-100/60 dark:border-gray-700/60 bg-white  dark:from-gray-800/70 dark:to-gray-900/70">
+        <Link href={"/"}>
+          {" "}
+          <h1 className="text-xl font-bold tracking-tight text-black ">
+            HASHSEVEN{" "}
+          </h1>
+        </Link>
       </div>
 
       {/* Navigation */}
@@ -148,8 +151,8 @@ export default function Sidebar() {
                   active
                     ? "bg-gradient-to-r from-gray-500 to-gray-600 text-white shadow-lg"
                     : childActive
-                    ? "bg-gray-50 dark:bg-gray-900/20 text-gray-700 dark:text-gray-300"
-                    : "text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-white"
+                    ? "bg-gray-50 text-gray-700 dark:text-gray-300"
+                    : "text-black hover:bg-gray-50 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-white"
                 )}
               >
                 {/* Animated side line */}
@@ -190,7 +193,7 @@ export default function Sidebar() {
       </ScrollArea>
 
       {/* User */}
-      <Card className="rounded-none border-0 bg-gradient-to-t from-gray-50 to-white dark:from-gray-800/70 dark:to-gray-900/60 shadow-inner border-t border-gray-100/60 dark:border-gray-700/60">
+      <Card className="rounded-none border-0 dark:from-gray-800/70 dark:to-gray-900/60 shadow-inner border-t border-gray-100/60 dark:border-gray-700/60">
         <CardContent className="p-4">
           <UserCard />
         </CardContent>

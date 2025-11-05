@@ -9,6 +9,7 @@ import {
   DropdownMenuItem,
 } from "./ui/dropdown-menu";
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
+import { User } from "lucide-react";
 
 interface AuthButtonProps {
   showSignup?: boolean; // Si true, afficher un bouton signup séparé
@@ -28,9 +29,12 @@ export default function AuthButton({ showSignup = false }: AuthButtonProps) {
   if (!session) {
     return (
       <div className="flex space-x-2">
-        <Button onClick={() => signIn("google")} variant="outline">
-          Sign In
-        </Button>
+        <button
+          onClick={() => signIn("google")}
+          className="bg-transparent cursor-pointer text-black "
+        >
+          <User size={24} className=" font-bold" />
+        </button>
         {showSignup && (
           <Button onClick={() => signIn("google")} variant="default">
             Sign Up

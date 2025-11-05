@@ -10,7 +10,7 @@ const Footer: React.FC<FooterProps> = ({ isAdmin }) => {
   if (isAdmin) return null;
 
   return (
-    <footer className="bg-white border-t border-gray-200 p-8">
+    <footer className="bg-white border-t border-gray-200 px-32">
       {/* Newsletter Section */}
       <div className="bg-black text-white  mx-4 mt-10 p-12 flex flex-col md:flex-row justify-between items-center gap-6">
         <h2 className="text-2xl md:text-3xl font-bold text-center md:text-left">

@@ -8,7 +8,13 @@ import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Eye, X, Plus } from "lucide-react";
 import ImageUpload from "@/components/image-upload";
 
@@ -19,15 +25,18 @@ type Category = {
   colors?: { id: string; color: string }[];
 };
 
-type FormType = {
+type ProductData = {
+  id: string;
   name: string;
-  category: Category;
   description: string;
-  price: string;
-  discount: string;
-  stock: number;
+  price: number;
+  discount: number;
   inStock: boolean;
-  images: string[];
+  stock: number;
+  images: { url: string }[];
+  category: Category;
+  colors: { color: string }[];
+  sizes: { size: string }[];
 };
 
 export default function EditProductPage() {
@@ -40,15 +49,15 @@ export default function EditProductPage() {
   const [categories, setCategories] = useState<Category[]>([]);
   const [error, setError] = useState<string>("");
 
-  const [form, setForm] = useState<FormType>({
+  const [form, setForm] = useState({
     name: "",
-    category: { id: "", name: "" },
     description: "",
     price: "",
     discount: "",
     inStock: true,
     stock: 0,
-    images: [],
+    images: [] as string[],
+    categoryId: "",
   });
 
   const [selectedSize, setSelectedSize] = useState<string>("");
@@ -63,17 +72,17 @@ export default function EditProductPage() {
         setLoading(true);
         const res = await fetch(`/api/products/${id}`);
         if (!res.ok) throw new Error("Produit non trouvé");
-        const data = await res.json();
+        const data: ProductData = await res.json();
 
         setForm({
           name: data.name || "",
-          category: data.category || { id: "", name: "" },
           description: data.description || "",
           price: data.price?.toString() || "",
           discount: data.discount?.toString() || "0",
           inStock: data.inStock ?? true,
           stock: data.stock ?? 0,
-          images: data.images?.map((img: any) => img.url) || [],
+          images: data.images?.map((img) => img.url) || [],
+          categoryId: data.category?.id || "",
         });
 
         setSelectedSize(data.sizes?.[0]?.size || "");
@@ -81,7 +90,7 @@ export default function EditProductPage() {
 
         // Charger les couleurs personnalisées existantes
         if (data.colors && data.colors.length > 0) {
-          const existingColors = data.colors.map((c: any) => c.color);
+          const existingColors = data.colors.map((c) => c.color);
           setCustomColors(existingColors);
         }
       } catch (err) {
@@ -112,23 +121,23 @@ export default function EditProductPage() {
   }, []);
 
   const handleChange = (
-    e: React.ChangeEvent<
-      HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
-    >
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
     const { name, value } = e.target;
     setForm((prev) => ({ ...prev, [name]: value }));
     setError("");
   };
 
-  const handleAddImage = (url: string) =>
+  const handleAddImage = (url: string) => {
     setForm((prev) => ({ ...prev, images: [...prev.images, url] }));
+  };
 
-  const handleRemoveImage = (url: string) =>
+  const handleRemoveImage = (url: string) => {
     setForm((prev) => ({
       ...prev,
       images: prev.images.filter((img) => img !== url),
     }));
+  };
 
   // Gestion des couleurs personnalisées
   const handleAddCustomColor = () => {
@@ -153,7 +162,7 @@ export default function EditProductPage() {
     if (!form.name.trim()) return setError("Le nom du produit est requis");
     if (!form.price.trim() || isNaN(parseFloat(form.price)))
       return setError("Le prix est invalide");
-    if (!form.category.id.trim()) return setError("La catégorie est requise");
+    if (!form.categoryId) return setError("La catégorie est requise");
 
     setLoading(true);
     setError("");
@@ -170,7 +179,7 @@ export default function EditProductPage() {
           inStock: form.inStock,
           stock: parseInt(form.stock.toString()),
           images: form.images,
-          categoryId: form.category.id,
+          categoryId: form.categoryId,
           sizes: selectedSize ? [selectedSize] : [],
           colors: selectedColor ? [selectedColor] : [],
         }),
@@ -182,15 +191,8 @@ export default function EditProductPage() {
         throw new Error(data.error || "Erreur lors de la mise à jour");
       }
 
-      setForm((prev) => ({
-        ...prev,
-        ...data,
-        category: data.category || prev.category,
-        images: data.images?.map((img: any) => img.url) || prev.images,
-      }));
-
-      setError("");
       alert("Produit mis à jour avec succès !");
+      router.push("/admin/dashboard/prods");
     } catch (err: any) {
       console.error("Erreur mise à jour produit:", err);
       setError(err.message || "Erreur lors de la mise à jour du produit");
@@ -199,7 +201,7 @@ export default function EditProductPage() {
     }
   };
 
-  const currentCategory = categories.find((cat) => cat.id === form.category.id);
+  const currentCategory = categories.find((cat) => cat.id === form.categoryId);
   const allColors = [
     ...(currentCategory?.colors?.map((c) => c.color) || []),
     ...customColors,
@@ -258,33 +260,26 @@ export default function EditProductPage() {
                 {/* Catégorie */}
                 <div className="space-y-2">
                   <Label htmlFor="category">Catégorie *</Label>
-                  <select
-                    id="category"
-                    name="category"
-                    value={form.category.id}
-                    onChange={(e) => {
-                      const selected = categories.find(
-                        (cat) => cat.id === e.target.value
-                      );
-                      setForm((prev) => ({
-                        ...prev,
-                        category: selected || { id: "", name: "" },
-                      }));
-                      // Réinitialiser la sélection de couleur/taille
+                  <Select
+                    value={form.categoryId}
+                    onValueChange={(value) => {
+                      setForm((prev) => ({ ...prev, categoryId: value }));
                       setSelectedColor("");
                       setSelectedSize("");
                     }}
-                    className="w-full border rounded px-3 py-2"
-                    required
                     disabled={loading}
                   >
-                    <option value="">Sélectionner une catégorie...</option>
-                    {categories.map((cat) => (
-                      <option key={cat.id} value={cat.id}>
-                        {cat.name}
-                      </option>
-                    ))}
-                  </select>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Sélectionner une catégorie" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {categories.map((cat) => (
+                        <SelectItem key={cat.id} value={cat.id}>
+                          {cat.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </div>
 
                 {/* Description */}
@@ -368,29 +363,26 @@ export default function EditProductPage() {
                 {currentCategory?.sizes && currentCategory.sizes.length > 0 && (
                   <div className="space-y-2">
                     <Label>Taille</Label>
-                    <RadioGroup
+                    <Select
                       value={selectedSize}
                       onValueChange={setSelectedSize}
-                      className="flex flex-wrap gap-4"
+                      disabled={loading}
                     >
-                      {currentCategory.sizes.map((size) => (
-                        <div
-                          key={size.id}
-                          className="flex items-center space-x-2"
-                        >
-                          <RadioGroupItem
-                            value={size.size}
-                            id={`size-${size.id}`}
-                            disabled={loading}
-                          />
-                          <Label htmlFor={`size-${size.id}`}>{size.size}</Label>
-                        </div>
-                      ))}
-                    </RadioGroup>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Sélectionner une taille" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {currentCategory.sizes.map((size) => (
+                          <SelectItem key={size.id} value={size.size}>
+                            {size.size}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
                   </div>
                 )}
 
-                {/* Couleur avec Color Picker */}
+                {/* Couleur */}
                 <div className="space-y-4">
                   <div className="flex items-center justify-between">
                     <Label className="text-base font-semibold">Couleur</Label>
@@ -407,176 +399,57 @@ export default function EditProductPage() {
                     )}
                   </div>
 
-                  {/* Color Picker compact */}
-                  <div className="bg-gray-50 rounded-lg p-4">
-                    <Label className="text-sm font-medium text-gray-700 block mb-3">
-                      Ajouter une couleur personnalisée
-                    </Label>
-                    <div className="flex gap-3 items-end">
-                      <div className="flex-1 grid grid-cols-[1fr,auto] gap-2">
-                        <div className="space-y-2">
-                          <Input
-                            value={newColor}
-                            onChange={(e) => setNewColor(e.target.value)}
-                            placeholder="#FFFFFF"
-                            className="font-mono text-sm"
-                            disabled={loading}
-                          />
-                          <div className="flex items-center gap-2 text-xs text-gray-500">
-                            <div
-                              className="w-3 h-3 rounded border"
-                              style={{ backgroundColor: newColor }}
-                            />
-                            <span>Aperçu</span>
-                          </div>
-                        </div>
-                        <div className="flex flex-col items-center gap-2">
-                          <input
-                            type="color"
-                            value={newColor}
-                            onChange={(e) => setNewColor(e.target.value)}
-                            className="w-10 h-10 rounded-lg border-2 border-gray-300 cursor-pointer hover:border-blue-500 transition-colors"
-                            disabled={loading}
-                            title="Choisir une couleur"
-                          />
-                        </div>
-                      </div>
-                      <Button
-                        type="button"
-                        onClick={handleAddCustomColor}
-                        disabled={loading || !newColor}
-                        size="sm"
-                        className="bg-blue-600 hover:bg-blue-700 whitespace-nowrap"
-                      >
-                        <Plus className="h-4 w-4" />
-                        Ajouter
-                      </Button>
-                    </div>
-                  </div>
-
-                  {/* Sélection de couleur - Version optimisée */}
+                  {/* Sélection de couleur */}
                   {allColors.length > 0 && (
                     <div className="space-y-3">
                       <Label className="text-sm font-medium text-gray-700">
-                        Choisir une couleur{" "}
-                        {currentCategory?.colors?.length &&
-                          `(${allColors.length} disponible${
-                            allColors.length > 1 ? "s" : ""
-                          })`}
+                        Choisir une couleur
                       </Label>
-
-                      <RadioGroup
+                      <Select
                         value={selectedColor}
                         onValueChange={setSelectedColor}
-                        className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3"
+                        disabled={loading}
                       >
-                        {/* Couleurs de la catégorie */}
-                        {currentCategory?.colors?.map((color) => (
-                          <div key={color.id} className="relative group">
-                            <RadioGroupItem
-                              value={color.color}
-                              id={`color-${color.id}`}
-                              disabled={loading}
-                              className="sr-only" // Masqué visuellement mais accessible
-                            />
-                            <Label
-                              htmlFor={`color-${color.id}`}
-                              className={`
-                flex items-center gap-3 p-3 rounded-lg border-2 cursor-pointer transition-all
-                ${
-                  selectedColor === color.color
-                    ? "border-blue-500 bg-blue-50 shadow-sm"
-                    : "border-gray-200 bg-white hover:border-gray-300 hover:bg-gray-50"
-                }
-                ${loading ? "opacity-50 cursor-not-allowed" : ""}
-              `}
-                            >
-                              <div
-                                className="w-6 h-6 rounded-full border-2 border-white shadow-sm"
-                                style={{ backgroundColor: color.color }}
-                              />
-                              <div className="flex-1 min-w-0">
-                                <span className="text-sm font-medium text-gray-900 truncate block">
-                                  {color.color}
-                                </span>
-                                {currentCategory?.colors && (
-                                  <span className="text-xs text-gray-500">
-                                    Catégorie
-                                  </span>
-                                )}
+                        <SelectTrigger>
+                          <SelectValue placeholder="Sélectionner une couleur" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {/* Couleurs de la catégorie */}
+                          {currentCategory?.colors?.map((color) => (
+                            <SelectItem key={color.id} value={color.color}>
+                              <div className="flex items-center gap-2">
+                                <div
+                                  className="w-4 h-4 rounded-full border"
+                                  style={{ backgroundColor: color.color }}
+                                />
+                                {color.color}
                               </div>
-                              {selectedColor === color.color && (
-                                <div className="w-2 h-2 bg-blue-500 rounded-full" />
-                              )}
-                            </Label>
-                          </div>
-                        ))}
+                            </SelectItem>
+                          ))}
 
-                        {/* Couleurs personnalisées */}
-                        {customColors.map((color, index) => (
-                          <div
-                            key={`custom-${index}`}
-                            className="relative group"
-                          >
-                            <RadioGroupItem
-                              value={color}
-                              id={`custom-color-${index}`}
-                              disabled={loading}
-                              className="sr-only"
-                            />
-                            <Label
-                              htmlFor={`custom-color-${index}`}
-                              className={`
-                flex items-center gap-3 p-3 rounded-lg border-2 cursor-pointer transition-all
-                ${
-                  selectedColor === color
-                    ? "border-blue-500 bg-blue-50 shadow-sm"
-                    : "border-gray-200 bg-white hover:border-gray-300 hover:bg-gray-50"
-                }
-                ${loading ? "opacity-50 cursor-not-allowed" : ""}
-              `}
-                            >
-                              <div
-                                className="w-6 h-6 rounded-full border-2 border-white shadow-sm"
-                                style={{ backgroundColor: color }}
-                              />
-                              <div className="flex-1 min-w-0">
-                                <span className="text-sm font-medium text-gray-900 truncate block">
+                          {/* Couleurs personnalisées */}
+                          {customColors.map((color, index) => (
+                            <SelectItem key={`custom-${index}`} value={color}>
+                              <div className="flex items-center gap-2 justify-between">
+                                <div className="flex items-center gap-2">
+                                  <div
+                                    className="w-4 h-4 rounded-full border"
+                                    style={{ backgroundColor: color }}
+                                  />
                                   {color}
-                                </span>
-                                <span className="text-xs text-gray-500">
-                                  Personnalisée
-                                </span>
-                              </div>
-                              <div className="flex items-center gap-1">
-                                {selectedColor === color && (
-                                  <div className="w-2 h-2 bg-blue-500 rounded-full mr-1" />
-                                )}
+                                </div>
                                 <X
-                                  className="h-4 w-4 text-gray-400 hover:text-red-500 transition-colors opacity-0 group-hover:opacity-100"
+                                  className="h-3 w-3 text-gray-400 hover:text-red-500 transition-colors"
                                   onClick={(e) => {
                                     e.preventDefault();
                                     handleRemoveCustomColor(color);
                                   }}
                                 />
                               </div>
-                            </Label>
-                          </div>
-                        ))}
-                      </RadioGroup>
-                    </div>
-                  )}
-
-                  {/* État vide */}
-                  {allColors.length === 0 && (
-                    <div className="text-center py-8 bg-gray-50 rounded-lg border-2 border-dashed border-gray-300">
-                      <div className="w-12 h-12 bg-gray-200 rounded-full flex items-center justify-center mx-auto mb-3">
-                        <Plus className="h-6 w-6 text-gray-400" />
-                      </div>
-                      <p className="text-gray-500 text-sm">
-                        Aucune couleur disponible. Ajoutez une couleur
-                        personnalisée.
-                      </p>
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
                     </div>
                   )}
                 </div>
@@ -590,6 +463,9 @@ export default function EditProductPage() {
                     onRemove={handleRemoveImage}
                     disabled={loading}
                   />
+                  <p className="text-sm text-gray-500">
+                    {form.images.length} image(s) sélectionnée(s)
+                  </p>
                 </div>
 
                 <Button type="submit" disabled={loading} className="w-full">
@@ -637,10 +513,9 @@ export default function EditProductPage() {
                     </p>
                   </div>
                   <p>
-                    <strong>Catégorie:</strong> {form.category.name || "N/A"}
+                    <strong>Catégorie:</strong> {currentCategory?.name || "N/A"}
                   </p>
 
-                  {/* Aperçu de la couleur avec visuel */}
                   <div className="flex items-center gap-2">
                     <strong>Couleur:</strong>
                     {selectedColor ? (

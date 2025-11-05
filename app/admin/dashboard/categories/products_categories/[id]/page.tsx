@@ -18,6 +18,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import ImageUpload from "@/components/image-upload";
 import {
   Dialog,
@@ -49,8 +50,9 @@ type CategoryData = {
 };
 
 export default function ProductsByCategory() {
-  const { id } = useParams();
+  const params = useParams();
   const router = useRouter();
+  const id = params.id as string;
 
   const [data, setData] = useState<CategoryData | null>(null);
   const [loading, setLoading] = useState(true);
@@ -95,7 +97,9 @@ export default function ProductsByCategory() {
   };
 
   useEffect(() => {
-    fetchProductsByCategory();
+    if (id) {
+      fetchProductsByCategory();
+    }
   }, [id]);
 
   // --- Add product ---
@@ -104,15 +108,22 @@ export default function ProductsByCategory() {
     setFormError(null);
     setSubmitting(true);
 
+    // Validation
+    if (!name.trim() || !price.trim()) {
+      setFormError("Name and price are required");
+      setSubmitting(false);
+      return;
+    }
+
     try {
       const res = await fetch(`/api/products`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          name,
+          name: name.trim(),
           price: parseFloat(price),
-          description,
-          stock: parseInt(stock),
+          description: description.trim(),
+          stock: stock ? parseInt(stock) : 0,
           sizes: selectedSize ? [selectedSize] : [],
           colors: selectedColor ? [selectedColor] : [],
           images,
@@ -142,6 +153,7 @@ export default function ProductsByCategory() {
       setInStock(true);
       setSubmitting(false);
 
+      // Refresh the list
       fetchProductsByCategory();
     } catch (err) {
       console.error(err);
@@ -207,6 +219,9 @@ export default function ProductsByCategory() {
       <div className="text-center py-12">
         <Folder className="h-12 w-12 mx-auto mb-4 text-muted-foreground opacity-50" />
         <h3 className="text-lg font-medium mb-2">Category not found</h3>
+        <Button onClick={() => router.push("/admin/dashboard/prods")}>
+          Back to Products
+        </Button>
       </div>
     );
   }
@@ -223,107 +238,126 @@ export default function ProductsByCategory() {
             {data.products.length} product(s)
           </p>
         </div>
+        <Button onClick={() => router.push("/admin/dashboard/prods")}>
+          Back to All Products
+        </Button>
       </div>
 
-      {/* Table */}
-      <div className="overflow-x-auto">
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>Name</TableHead>
-              <TableHead>Created At</TableHead>
-              <TableHead>Images</TableHead>
-              <TableHead>Sizes</TableHead>
-              <TableHead>Colors</TableHead>
-              <TableHead>Actions</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {(data.products || []).map((product) => (
-              <TableRow key={product.id} className="hover:bg-gray-50">
-                <TableCell>{product.name}</TableCell>
-                <TableCell>
-                  {format(new Date(product.createdAt), "MMM dd, yyyy")}
-                </TableCell>
-                <TableCell>
-                  <div className="flex items-center gap-1">
-                    <ImageIcon className="h-4 w-4 text-muted-foreground" />
-                    <div className="flex -space-x-2">
-                      {(product.images || []).slice(0, 3).map((img) => (
-                        <img
-                          key={img.id}
-                          src={img.url}
-                          alt={product.name}
-                          className="h-6 w-6 rounded border-2 border-white object-cover"
-                        />
-                      ))}
-                      {(product.images?.length || 0) > 3 && (
-                        <div className="h-6 w-6 rounded bg-gray-200 border-2 border-white flex items-center justify-center text-xs">
-                          +{(product.images?.length || 0) - 3}
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                </TableCell>
-                <TableCell>
-                  {(product.sizes || []).length > 0 ? (
-                    <div className="flex flex-wrap gap-1">
-                      {(product.sizes || []).map((s) => (
-                        <Badge key={s.id} variant="outline" className="text-xs">
-                          {s.size}
-                        </Badge>
-                      ))}
-                    </div>
-                  ) : (
-                    "-"
-                  )}
-                </TableCell>
-                <TableCell>
-                  {(product.colors || []).length > 0 ? (
-                    <div className="flex flex-wrap gap-2">
-                      {(product.colors || []).map((c) => (
-                        <div
-                          key={c.id}
-                          className="flex items-center gap-2 bg-background border rounded-lg pl-2 pr-3 py-1 shadow-sm"
-                        >
-                          <div
-                            className="w-5 h-5 rounded border shadow-sm"
-                            style={{ backgroundColor: c.color }}
-                            title={c.color}
-                          />
-                          <span className="text-xs font-mono max-w-[60px] truncate">
-                            {c.color}
-                          </span>
-                        </div>
-                      ))}
-                    </div>
-                  ) : (
-                    "-"
-                  )}
-                </TableCell>
-                <TableCell className="flex gap-2">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => handleEditProduct(product.id)}
-                  >
-                    <Pencil className="h-4 w-4 mr-1" />
-                    Edit
-                  </Button>
-                  <Button
-                    variant="destructive"
-                    size="sm"
-                    onClick={() => confirmDeleteProduct(product.id)}
-                  >
-                    <Trash2 className="h-4 w-4 mr-1" />
-                    Delete
-                  </Button>
-                </TableCell>
+      {/* Products Table */}
+      {data.products.length > 0 ? (
+        <div className="overflow-x-auto border rounded-lg">
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Name</TableHead>
+                <TableHead>Created At</TableHead>
+                <TableHead>Images</TableHead>
+                <TableHead>Sizes</TableHead>
+                <TableHead>Colors</TableHead>
+                <TableHead>Actions</TableHead>
               </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      </div>
+            </TableHeader>
+            <TableBody>
+              {data.products.map((product) => (
+                <TableRow key={product.id} className="hover:bg-gray-50">
+                  <TableCell className="font-medium">{product.name}</TableCell>
+                  <TableCell>
+                    {format(new Date(product.createdAt), "MMM dd, yyyy")}
+                  </TableCell>
+                  <TableCell>
+                    <div className="flex items-center gap-1">
+                      <ImageIcon className="h-4 w-4 text-muted-foreground" />
+                      <div className="flex -space-x-2">
+                        {(product.images || []).slice(0, 3).map((img) => (
+                          <img
+                            key={img.id}
+                            src={img.url}
+                            alt={product.name}
+                            className="h-6 w-6 rounded border-2 border-white object-cover"
+                          />
+                        ))}
+                        {(product.images?.length || 0) > 3 && (
+                          <div className="h-6 w-6 rounded bg-gray-200 border-2 border-white flex items-center justify-center text-xs">
+                            +{(product.images?.length || 0) - 3}
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  </TableCell>
+                  <TableCell>
+                    {(product.sizes || []).length > 0 ? (
+                      <div className="flex flex-wrap gap-1">
+                        {(product.sizes || []).map((s) => (
+                          <Badge
+                            key={s.id}
+                            variant="outline"
+                            className="text-xs"
+                          >
+                            {s.size}
+                          </Badge>
+                        ))}
+                      </div>
+                    ) : (
+                      "-"
+                    )}
+                  </TableCell>
+                  <TableCell>
+                    {(product.colors || []).length > 0 ? (
+                      <div className="flex flex-wrap gap-2">
+                        {(product.colors || []).map((c) => (
+                          <div
+                            key={c.id}
+                            className="flex items-center gap-2 bg-background border rounded-lg pl-2 pr-3 py-1 shadow-sm"
+                          >
+                            <div
+                              className="w-5 h-5 rounded border shadow-sm"
+                              style={{ backgroundColor: c.color }}
+                              title={c.color}
+                            />
+                            <span className="text-xs font-mono max-w-[60px] truncate">
+                              {c.color}
+                            </span>
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      "-"
+                    )}
+                  </TableCell>
+                  <TableCell>
+                    <div className="flex gap-2">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => handleEditProduct(product.id)}
+                      >
+                        <Pencil className="h-4 w-4 mr-1" />
+                        Edit
+                      </Button>
+                      <Button
+                        variant="destructive"
+                        size="sm"
+                        onClick={() => confirmDeleteProduct(product.id)}
+                      >
+                        <Trash2 className="h-4 w-4 mr-1" />
+                        Delete
+                      </Button>
+                    </div>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </div>
+      ) : (
+        <div className="text-center py-12 border rounded-lg">
+          <Folder className="h-12 w-12 mx-auto mb-4 text-muted-foreground opacity-50" />
+          <h3 className="text-lg font-medium mb-2">No products found</h3>
+          <p className="text-muted-foreground mb-4">
+            Get started by adding your first product to this category.
+          </p>
+        </div>
+      )}
 
       {/* Delete confirmation dialog */}
       <Dialog open={isDeleteOpen} onOpenChange={setIsDeleteOpen}>
@@ -347,115 +381,172 @@ export default function ProductsByCategory() {
       </Dialog>
 
       {/* Add Product Form */}
-      <div className="mt-12 p-6 border rounded-md bg-white shadow-sm space-y-4">
+      <div className="mt-12 p-6 border rounded-md bg-white shadow-sm space-y-6">
         <h2 className="text-xl font-semibold">
           Add Product to {data.category.name}
         </h2>
 
-        {formError && <Alert variant="destructive">{formError}</Alert>}
+        {formError && (
+          <Alert variant="destructive">
+            <AlertDescription>{formError}</AlertDescription>
+          </Alert>
+        )}
 
         <form onSubmit={handleAddProduct} className="space-y-4">
-          <Input
-            placeholder="Product Name"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            required
-          />
-          <Input
-            placeholder="Price"
-            type="number"
-            value={price}
-            onChange={(e) => setPrice(e.target.value)}
-            required
-          />
-          <Input
-            placeholder="Stock"
-            type="number"
-            value={stock}
-            onChange={(e) => setStock(e.target.value)}
-          />
-          <Input
-            placeholder="Discount (%)"
-            type="number"
-            value={discount}
-            onChange={(e) => setDiscount(e.target.value)}
-          />
-          <label className="flex items-center gap-2">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <label className="text-sm font-medium">Product Name *</label>
+              <Input
+                placeholder="Product Name"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                required
+              />
+            </div>
+
+            <div className="space-y-2">
+              <label className="text-sm font-medium">Price (€) *</label>
+              <Input
+                placeholder="Price"
+                type="number"
+                step="0.01"
+                min="0"
+                value={price}
+                onChange={(e) => setPrice(e.target.value)}
+                required
+              />
+            </div>
+
+            <div className="space-y-2">
+              <label className="text-sm font-medium">Stock</label>
+              <Input
+                placeholder="Stock"
+                type="number"
+                min="0"
+                value={stock}
+                onChange={(e) => setStock(e.target.value)}
+              />
+            </div>
+
+            <div className="space-y-2">
+              <label className="text-sm font-medium">Discount (%)</label>
+              <Input
+                placeholder="Discount"
+                type="number"
+                min="0"
+                max="100"
+                value={discount}
+                onChange={(e) => setDiscount(e.target.value)}
+              />
+            </div>
+          </div>
+
+          <div className="space-y-2">
+            <label className="text-sm font-medium">Description</label>
+            <Textarea
+              placeholder="Product description"
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              rows={3}
+            />
+          </div>
+
+          <div className="flex items-center space-x-2">
             <input
               type="checkbox"
+              id="inStock"
               checked={inStock}
               onChange={(e) => setInStock(e.target.checked)}
+              className="rounded"
             />
-            In Stock
-          </label>
-          <Input
-            placeholder="Description"
-            value={description}
-            onChange={(e) => setDescription(e.target.value)}
-          />
-
-          {/* Select Size (radio) */}
-          <div>
-            <h3 className="font-medium">Select Size</h3>
-            <div className="flex flex-wrap gap-3 mt-1">
-              {(data.category.sizes || []).map((size) => (
-                <label key={size.id} className="flex items-center gap-1">
-                  <input
-                    type="radio"
-                    name="size"
-                    value={size.size}
-                    checked={selectedSize === size.size}
-                    onChange={(e) => setSelectedSize(e.target.value)}
-                  />
-                  {size.size}
-                </label>
-              ))}
-            </div>
+            <label htmlFor="inStock" className="text-sm font-medium">
+              In Stock
+            </label>
           </div>
 
-          {/* Select Color (radio) avec aperçu visuel */}
-          <div>
-            <h3 className="font-medium">Select Color</h3>
-            <div className="flex flex-wrap gap-3 mt-1">
-              {(data.category.colors || []).map((color) => (
-                <label
-                  key={color.id}
-                  className="flex items-center gap-2 cursor-pointer"
-                >
-                  <input
-                    type="radio"
-                    name="color"
-                    value={color.color}
-                    checked={selectedColor === color.color}
-                    onChange={(e) => setSelectedColor(e.target.value)}
-                    className="sr-only"
-                  />
-                  <div
-                    className={`w-8 h-8 rounded border-2 flex items-center justify-center ${
-                      selectedColor === color.color
-                        ? "border-primary ring-2 ring-primary ring-offset-1"
-                        : "border-gray-300"
-                    }`}
-                    style={{ backgroundColor: color.color }}
-                    title={color.color}
-                  />
-                  <span className="text-sm font-mono max-w-[80px] truncate">
-                    {color.color}
-                  </span>
-                </label>
-              ))}
+          {/* Select Size */}
+          {data.category.sizes && data.category.sizes.length > 0 && (
+            <div className="space-y-2">
+              <label className="text-sm font-medium">Select Size</label>
+              <div className="flex flex-wrap gap-3 mt-1">
+                {data.category.sizes.map((size) => (
+                  <label
+                    key={size.id}
+                    className="flex items-center gap-2 cursor-pointer"
+                  >
+                    <input
+                      type="radio"
+                      name="size"
+                      value={size.size}
+                      checked={selectedSize === size.size}
+                      onChange={(e) => setSelectedSize(e.target.value)}
+                      className="rounded"
+                    />
+                    <span className="text-sm">{size.size}</span>
+                  </label>
+                ))}
+              </div>
             </div>
+          )}
+
+          {/* Select Color */}
+          {data.category.colors && data.category.colors.length > 0 && (
+            <div className="space-y-2">
+              <label className="text-sm font-medium">Select Color</label>
+              <div className="flex flex-wrap gap-3 mt-1">
+                {data.category.colors.map((color) => (
+                  <label
+                    key={color.id}
+                    className="flex items-center gap-2 cursor-pointer"
+                  >
+                    <input
+                      type="radio"
+                      name="color"
+                      value={color.color}
+                      checked={selectedColor === color.color}
+                      onChange={(e) => setSelectedColor(e.target.value)}
+                      className="sr-only"
+                    />
+                    <div
+                      className={`w-8 h-8 rounded border-2 flex items-center justify-center ${
+                        selectedColor === color.color
+                          ? "border-primary ring-2 ring-primary ring-offset-1"
+                          : "border-gray-300"
+                      }`}
+                      style={{ backgroundColor: color.color }}
+                      title={color.color}
+                    />
+                    <span className="text-sm font-mono max-w-[80px] truncate">
+                      {color.color}
+                    </span>
+                  </label>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Image Upload */}
+          <div className="space-y-2">
+            <label className="text-sm font-medium">Product Images</label>
+            <ImageUpload
+              value={images}
+              onChange={(url) => setImages([...images, url])}
+              onRemove={(url) => setImages(images.filter((i) => i !== url))}
+              disabled={submitting}
+            />
+            {images.length > 0 && (
+              <p className="text-sm text-gray-500">
+                {images.length} image(s) selected
+              </p>
+            )}
           </div>
 
-          <ImageUpload
-            value={images}
-            onChange={(url) => setImages([...images, url])}
-            onRemove={(url) => setImages(images.filter((i) => i !== url))}
-            disabled={loading}
-          />
-
-          <Button type="submit" disabled={submitting}>
-            {submitting ? "Adding..." : "Add Product"}
+          <Button
+            type="submit"
+            disabled={submitting}
+            className="w-full md:w-auto"
+          >
+            {submitting ? "Adding Product..." : "Add Product"}
           </Button>
         </form>
       </div>

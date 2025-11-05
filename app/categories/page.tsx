@@ -755,7 +755,7 @@ export default function CombinedCategoriesPage() {
                           className="sr-only"
                         />
                         <div
-                          className={`px-3 py-2 border rounded-lg text-sm font-medium transition-all duration-200 capitalize ${
+                          className={`px-3 py-2   text-sm font-medium transition-all duration-200 capitalize ${
                             selectedSizes.includes(size)
                               ? "bg-black text-white border-black"
                               : "bg-gray-100 text-gray-700 border-gray-300 hover:bg-gray-200"
@@ -813,7 +813,7 @@ export default function CombinedCategoriesPage() {
               </div>
             ) : products.length === 0 ? (
               <div className="bg-white rounded-2xl shadow-lg p-12 text-center">
-                <div className="w-20 h-20 mx-auto mb-6 bg-gradient-to-br from-gray-100 to-gray-200 rounded-full flex items-center justify-center">
+                <div className="w-20 h-20 mx-auto mb-6 bg-white rounded-full flex items-center justify-center">
                   <span className="text-2xl text-gray-400">📦</span>
                 </div>
                 <h3 className="text-xl font-semibold text-gray-700 mb-3">
@@ -884,7 +884,7 @@ export default function CombinedCategoriesPage() {
                             sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
                           />
                         ) : (
-                          <div className="w-full h-full bg-gradient-to-br from-gray-50 to-gray-100 flex items-center justify-center">
+                          <div className="w-full h-full bg-white  flex items-center justify-center">
                             <span className="text-4xl text-gray-300">📦</span>
                           </div>
                         )}
@@ -956,7 +956,7 @@ export default function CombinedCategoriesPage() {
                               {"★".repeat(4)}
                               <span className="text-gray-300">★</span>
                             </div>
-                            <span className="text-xs text-gray-500">(42)</span>
+                            <span className="text-xs text-gray-500">4.0/5</span>
                           </div>
                         </div>
 
@@ -1035,10 +1035,10 @@ export default function CombinedCategoriesPage() {
                       <button
                         key={page}
                         onClick={() => handlePageChange(page)}
-                        className={`px-3 py-2 rounded-lg text-sm font-medium border ${
+                        className={`px-3 py-2 text-sm font-medium  ${
                           currentPage === page
-                            ? "bg-gray-600 text-white border-gray-600"
-                            : "text-gray-700 border-gray-300 hover:bg-gray-50"
+                            ? "bg-[#0000000F] text-black "
+                            : "text-[#00000080]  "
                         }`}
                       >
                         {page}

@@ -161,7 +161,7 @@ export default function Home() {
 
       {/* ✅ Section jeans maintenant fonctionnelle */}
       <div className="px-36">
-        <h1 className="text-center font-bold text-4xl py-12">
+        <h1 className="text-center font-bold text-4xl py-12 text-black">
           Our jeans collection
         </h1>
         <ProductList

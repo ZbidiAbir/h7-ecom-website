@@ -59,22 +59,18 @@ const SlideContent = memo(({ slide, isActive, direction }: SlideProps) => {
           : "opacity-0 transform translate-x-20 pointer-events-none"
       }`}
     >
-      {/* Images Container */}
+      {/* Images Container - Modifié pour aligner les images au même niveau */}
       <div className="flex gap-4 md:gap-8 justify-center items-center relative">
         {slide.images.map((img, index) => (
           <div
             key={`${slide.id}-${index}`}
             className="relative group cursor-pointer"
-            style={{
-              transform: `translateY(${index % 2 === 0 ? "-20px" : "20px"})`,
-              transition: "transform 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94)",
-            }}
           >
-            <div className="relative w-44 h-64 sm:w-60 sm:h-80 md:w-80 md:h-96 lg:w-96 lg:h-[500px] xl:w-[450px] xl:h-[600px] overflow-hidden rounded-2xl shadow-2xl">
+            <div className="relative w-44 h-64 sm:w-60 sm:h-80 md:w-80 md:h-96 lg:w-96 lg:h-[500px] xl:w-[450px] xl:h-[600px] overflow-hidden shadow-2xl">
               {/* Loading Overlay */}
               {imagesLoaded < totalImages && (
                 <div className="absolute inset-0 bg-gray-900/50 flex items-center justify-center z-10">
-                  <div className="animate-spin  h-8 w-8 border-b-2 border-white"></div>
+                  <div className="animate-spin h-8 w-8 border-b-2 border-white"></div>
                 </div>
               )}
 
@@ -93,11 +89,7 @@ const SlideContent = memo(({ slide, isActive, direction }: SlideProps) => {
 
               {/* Shine Effect */}
               <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -skew-x-12 transform translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000" />
-
-              {/* Hover Badge */}
             </div>
-
-            {/* Floating Element */}
           </div>
         ))}
       </div>
@@ -217,7 +209,7 @@ export default function BestSellersLookbook() {
           {/* Navigation Buttons */}
           <button
             onClick={prevSlide}
-            className="absolute left-2 md:left-4 lg:left-8 z-20 bg-white/10 hover:bg-white/20 backdrop-blur-lg text-white p-4 rounded-full transition-all duration-300 hover:scale-110 focus:outline-none focus:ring-2 focus:ring-white/50 border border-white/20 shadow-2xl"
+            className="absolute left-2 md:left-4 lg:left-8 z-20 bg-white/10 hover:bg-white/20 backdrop-blur-lg text-white p-4 rounded-full transition-all duration-300 hover:scale-110 focus:outline-none focus:ring-2 focus:ring-white/50  shadow-2xl"
             aria-label="Previous slide"
           >
             <ChevronLeft size={32} />
@@ -238,7 +230,7 @@ export default function BestSellersLookbook() {
           {/* Next Button */}
           <button
             onClick={nextSlide}
-            className="absolute right-2 md:right-4 lg:right-8 z-20 bg-white/10 hover:bg-white/20 backdrop-blur-lg text-white p-4 rounded-full transition-all duration-300 hover:scale-110 focus:outline-none focus:ring-2 focus:ring-white/50 border border-white/20 shadow-2xl"
+            className="absolute right-2 md:right-4 lg:right-8 z-20 bg-white/10 hover:bg-white/20 backdrop-blur-lg text-white p-4 rounded-full transition-all duration-300 hover:scale-110 focus:outline-none focus:ring-2 focus:ring-white/50shadow-2xl"
             aria-label="Next slide"
           >
             <ChevronRight size={32} />
