@@ -13,7 +13,6 @@ import { Slider } from "@/components/ui/slider";
 import HeaderWrapper from "@/components/HeaderWrapper";
 import { FiShoppingCart } from "react-icons/fi";
 
-// Composant CategoryDropdown
 interface Category {
   id: string;
   name: string;
@@ -106,17 +105,14 @@ function CategoryDropdown({
   );
 }
 
-// Fonctions utilitaires pour extraire les couleurs et tailles
 const getAvailableColors = (categories: Category[] = []) => {
   const colors = new Set<string>();
 
   categories.forEach((category) => {
-    // Couleurs de la catégorie
     category.colors?.forEach((c) => {
       if (c.color) colors.add(c.color.toLowerCase());
     });
 
-    // Couleurs des sous-catégories
     category.subcategories?.forEach((sub) => {
       sub.colors?.forEach((c) => {
         if (c.color) colors.add(c.color.toLowerCase());
@@ -130,14 +126,12 @@ const getAvailableColors = (categories: Category[] = []) => {
 const getAvailableSizes = (items: any[], categories: Category[] = []) => {
   const sizes = new Set<string>();
 
-  // Tailles provenant des produits
   items.forEach((item) => {
     item.sizes?.forEach((sizeObj: any) => {
       sizes.add(sizeObj.size);
     });
   });
 
-  // Tailles provenant des catégories
   categories.forEach((cat) => {
     cat.sizes?.forEach((sizeObj) => {
       sizes.add(sizeObj.size);
@@ -147,18 +141,15 @@ const getAvailableSizes = (items: any[], categories: Category[] = []) => {
   return Array.from(sizes).sort();
 };
 
-// Fonction pour obtenir les tailles de la catégorie sélectionnée
 const getCategorySizes = (selectedCategory: Category | null): string[] => {
   if (!selectedCategory) return [];
 
   const sizes = new Set<string>();
 
-  // Ajouter les tailles de la catégorie principale
   selectedCategory.sizes?.forEach((sizeObj) => {
     if (sizeObj.size) sizes.add(sizeObj.size);
   });
 
-  // Ajouter les tailles des sous-catégories
   selectedCategory.subcategories?.forEach((sub) => {
     sub.sizes?.forEach((sizeObj) => {
       if (sizeObj.size) sizes.add(sizeObj.size);
@@ -168,7 +159,6 @@ const getCategorySizes = (selectedCategory: Category | null): string[] => {
   return Array.from(sizes).sort();
 };
 
-// Composant principal
 export default function CombinedCategoriesPage() {
   const [categories, setCategories] = useState<Category[]>([]);
   const [selectedCategory, setSelectedCategory] = useState<any>(null);
@@ -183,47 +173,36 @@ export default function CombinedCategoriesPage() {
   });
   const [error, setError] = useState<string | null>(null);
 
-  // États pour les filtres
   const [priceRange, setPriceRange] = useState<[number, number]>([0, 1000]);
   const [selectedColors, setSelectedColors] = useState<string[]>([]);
   const [selectedSizes, setSelectedSizes] = useState<string[]>([]);
   const [availableColors, setAvailableColors] = useState<string[]>([]);
   const [availableSizes, setAvailableSizes] = useState<string[]>([]);
 
-  // États pour la pagination
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(8);
 
-  // Fonction pour obtenir les tailles disponibles basées sur le contexte
-  // Fonction pour obtenir les tailles disponibles basées sur le contexte
   const getContextualSizes = (): string[] => {
-    // Si une catégorie est sélectionnée, utiliser SES tailles seulement
     if (selectedCategory) {
       return getCategorySizes(selectedCategory);
     }
 
-    // Si aucune catégorie n'est sélectionnée, ne retourner AUCUNE taille
     return [];
   };
 
-  // Fonction pour obtenir les produits paginés
   const getPaginatedProducts = () => {
     const startIndex = (currentPage - 1) * itemsPerPage;
     const endIndex = startIndex + itemsPerPage;
     return products.slice(startIndex, endIndex);
   };
 
-  // Fonction pour changer de page
   const handlePageChange = (page: number) => {
     setCurrentPage(page);
-    // Scroll vers le haut quand on change de page
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
-  // Calcul du nombre total de pages
   const totalPages = Math.ceil(products.length / itemsPerPage);
 
-  // Générer les numéros de page à afficher
   const getPageNumbers = () => {
     const pages = [];
     const maxVisiblePages = 5;
@@ -231,7 +210,6 @@ export default function CombinedCategoriesPage() {
     let startPage = Math.max(1, currentPage - Math.floor(maxVisiblePages / 2));
     let endPage = Math.min(totalPages, startPage + maxVisiblePages - 1);
 
-    // Ajuster si on est près de la fin
     if (endPage - startPage + 1 < maxVisiblePages) {
       startPage = Math.max(1, endPage - maxVisiblePages + 1);
     }
@@ -243,7 +221,6 @@ export default function CombinedCategoriesPage() {
     return pages;
   };
 
-  // Fonction pour obtenir les produits uniques
   const getUniqueProducts = (products: any[]) => {
     const uniqueProductsByColor: Record<string, any> = {};
 
@@ -275,16 +252,13 @@ export default function CombinedCategoriesPage() {
     return Object.values(uniqueProductsByColor);
   };
 
-  // Fonction pour appliquer les filtres
   const applyFilters = (productsToFilter: any[]) => {
     return productsToFilter.filter((product) => {
-      // Filtre par prix
       const productPrice = product.price || 0;
       if (productPrice < priceRange[0] || productPrice > priceRange[1]) {
         return false;
       }
 
-      // Filtre par couleurs
       if (selectedColors.length > 0) {
         const productColors =
           product.colors?.map((c: any) => c.color.toLowerCase()) || [];
@@ -296,7 +270,6 @@ export default function CombinedCategoriesPage() {
         }
       }
 
-      // Filtre par tailles
       if (selectedSizes.length > 0) {
         const productSizes = [
           ...product.sizes?.map((s: any) => s.size),
@@ -314,7 +287,6 @@ export default function CombinedCategoriesPage() {
     });
   };
 
-  // Gestion de la sélection de catégorie depuis le dropdown
   const handleCategoryDropdownSelect = (
     type: "parent" | "sub" | "all",
     value: string
@@ -323,15 +295,13 @@ export default function CombinedCategoriesPage() {
       const category = categories.find((cat) => cat.id === value);
       if (category) {
         setSelectedCategory(category);
-        // Réinitialiser les sélections
         setSelectedSizes([]);
         setSelectedColors([]);
-        setCurrentPage(1); // Reset à la première page
+        setCurrentPage(1);
       }
     }
   };
 
-  // Mettre à jour les filtres disponibles quand les produits changent
   useEffect(() => {
     let sourceProducts = selectedCategory
       ? products
@@ -350,7 +320,6 @@ export default function CombinedCategoriesPage() {
     categories,
   ]);
 
-  // Réinitialiser la pagination quand les filtres changent
   useEffect(() => {
     setCurrentPage(1);
   }, [
@@ -361,34 +330,28 @@ export default function CombinedCategoriesPage() {
     selectedSizes,
   ]);
 
-  // Chargement des données initiales
   useEffect(() => {
     const fetchInitialData = async () => {
       try {
-        // Charger les catégories
         const categoriesRes = await fetch("/api/categories");
         const categoriesData = await categoriesRes.json();
         setCategories(categoriesData);
 
-        // Charger tous les produits
         const productsRes = await fetch("/api/unique");
         const productsData = await productsRes.json();
         const productsArray = productsData.products || productsData || [];
 
         setAllProducts(productsArray);
 
-        // Obtenir les produits uniques
         const uniqueProducts = getUniqueProducts(productsArray);
         setAllUniqueProducts(uniqueProducts);
         setProducts(uniqueProducts);
 
-        // Extraire les couleurs et tailles disponibles
         const colors = getAvailableColors(productsArray);
         const sizes = getAvailableSizes(productsArray);
         setAvailableColors(colors);
         setAvailableSizes(sizes);
 
-        // Calculer la plage de prix maximale
         const prices = productsArray.map((p: any) => p.price || 0);
         const maxPrice = Math.ceil(Math.max(...prices, 1000));
         setPriceRange([0, maxPrice]);
@@ -406,7 +369,6 @@ export default function CombinedCategoriesPage() {
     fetchInitialData();
   }, []);
 
-  // Charger les produits quand la catégorie ou le mode d'affichage change
   useEffect(() => {
     if (!selectedCategory) {
       let baseProducts =
@@ -445,7 +407,6 @@ export default function CombinedCategoriesPage() {
     fetchCategoryProducts();
   }, [selectedCategory, displayMode, allUniqueProducts, allProducts]);
 
-  // Appliquer les filtres quand ils changent
   useEffect(() => {
     if (selectedCategory) {
       const fetchWithFilters = async () => {
@@ -474,7 +435,6 @@ export default function CombinedCategoriesPage() {
     }
   }, [priceRange, selectedColors, selectedSizes]);
 
-  // Fonctions d'affichage
   const showAllProducts = () => {
     setDisplayMode("all");
     setSelectedCategory(null);
@@ -501,7 +461,6 @@ export default function CombinedCategoriesPage() {
     showAllUniqueProducts();
   };
 
-  // Fonctions pour les filtres
   const handlePriceRangeChange = (min: number, max: number) => {
     setPriceRange([min, max]);
   };
@@ -533,7 +492,6 @@ export default function CombinedCategoriesPage() {
     Math.max(...allProducts.map((p: any) => p.price || 0), 1000)
   );
 
-  // Vérifier si des filtres sont actifs
   const hasActiveFilters =
     priceRange[0] > 0 ||
     priceRange[1] < maxPrice ||
@@ -586,7 +544,6 @@ export default function CombinedCategoriesPage() {
   return (
     <div className="min-h-screen bg-white py-8 px-4 sm:px-6 lg:px-24">
       <div className=" mx-auto">
-        {/* Header */}
         <HeaderWrapper />
 
         {error && (
@@ -602,9 +559,7 @@ export default function CombinedCategoriesPage() {
         )}
 
         <div className="flex flex-col lg:flex-row gap-8 py-24">
-          {/* Sidebar */}
           <div className="lg:w-80">
-            {/* Dropdown pour mobile */}
             <div className="lg:hidden mb-6">
               <label
                 htmlFor="category-select"
@@ -666,7 +621,6 @@ export default function CombinedCategoriesPage() {
               </div>
             </div>
 
-            {/* Sidebar desktop */}
             <div className="hidden lg:block bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden">
               <div className="p-6 border-b border-gray-100">
                 <h2 className="text-xl font-bold text-gray-800">Filters</h2>
@@ -682,18 +636,21 @@ export default function CombinedCategoriesPage() {
               <div>
                 <div className="p-4 border-b border-gray-100 bg-gray-50"></div>
 
-                {/* Utilisation du CategoryDropdown */}
                 <CategoryDropdown
                   categories={categories}
                   onCategorySelect={handleCategoryDropdownSelect}
                   selectedCategory={selectedCategory?.id}
                 />
               </div>
-              {/* Filtre par prix */}
               <div className="p-6 border-b border-gray-100">
                 <h3 className="font-semibold text-gray-800 mb-4">Price</h3>
                 <div className="space-y-4">
                   <div>
+                    <div className="flex justify-between text-sm text-gray-700 mb-3">
+                      <span> {priceRange[0]} dt</span>
+                      <span> {priceRange[1]} dt</span>
+                    </div>
+
                     <Slider
                       defaultValue={[0, maxPrice]}
                       value={[priceRange[0], priceRange[1]]}
@@ -704,15 +661,10 @@ export default function CombinedCategoriesPage() {
                       }
                       className="w-full"
                     />
-                    <div className="flex justify-between text-sm text-gray-600 mt-2">
-                      <span>0 dt</span>
-                      <span>{maxPrice} dt</span>
-                    </div>
                   </div>
                 </div>
               </div>
 
-              {/* Filtre par couleurs */}
               {availableColors.length > 0 && (
                 <div className="p-6 border-b border-gray-100">
                   <h3 className="font-semibold text-gray-800 mb-4">Colors</h3>
@@ -738,7 +690,6 @@ export default function CombinedCategoriesPage() {
                 </div>
               )}
 
-              {/* Filtre par tailles - AFFICHER UNIQUEMENT POUR CATÉGORIE SÉLECTIONNÉE */}
               {selectedCategory && getContextualSizes().length > 0 && (
                 <div className="p-6 border-b border-gray-100">
                   <h3 className="font-semibold text-gray-800 mb-4">Sizes</h3>
@@ -770,7 +721,6 @@ export default function CombinedCategoriesPage() {
               )}
             </div>
 
-            {/* Catégorie sélectionnée info (mobile) */}
             {selectedCategory && (
               <div className="lg:hidden mt-6 bg-white rounded-2xl shadow-lg p-6">
                 <h2 className="text-xl font-bold text-gray-800 mb-3">
@@ -793,7 +743,6 @@ export default function CombinedCategoriesPage() {
             )}
           </div>
 
-          {/* Contenu principal - Produits */}
           <div className="flex-1">
             {loading.products ? (
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -833,7 +782,6 @@ export default function CombinedCategoriesPage() {
               </div>
             ) : (
               <>
-                {/* En-tête des produits */}
                 <div className="mb-6 flex items-center justify-end">
                   <div className="text-sm text-gray-600">
                     Showing {(currentPage - 1) * itemsPerPage + 1} to{" "}
@@ -864,7 +812,6 @@ export default function CombinedCategoriesPage() {
                   )}
                 </div>
 
-                {/* Grid des produits PAGINÉS */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
                   {getPaginatedProducts().map((product: any) => (
                     <Link
@@ -873,7 +820,6 @@ export default function CombinedCategoriesPage() {
                       className="group relative bg-white 
                         transition-all duration-300 overflow-hidden border border-gray-100 hover:border-gray-200"
                     >
-                      {/* Image container */}
                       <div className="relative h-72 w-full overflow-hidden">
                         {product.images?.[0]?.url ? (
                           <Image
@@ -889,10 +835,8 @@ export default function CombinedCategoriesPage() {
                           </div>
                         )}
 
-                        {/* Overlay avec actions au hover */}
                         <div className="absolute inset-0 bg-black/0 group-hover:bg-black/5 transition-colors duration-300" />
 
-                        {/* Badge de stock */}
                         <div className="absolute top-3 right-3">
                           <span
                             className={`text-xs px-2.5 py-1 rounded-full font-medium backdrop-blur-sm ${
@@ -911,7 +855,6 @@ export default function CombinedCategoriesPage() {
                           </span>
                         </div>
 
-                        {/* Badge de promotion */}
                         {product.discount > 0 && (
                           <div className="absolute ">
                             <span className="bg-black text-white text-xs font-bold px-2.5 py-1">
@@ -920,7 +863,6 @@ export default function CombinedCategoriesPage() {
                           </div>
                         )}
 
-                        {/* Indicateur de couleur */}
                         {product.colors?.length > 0 && (
                           <div className="absolute bottom-3 left-3 flex items-center gap-2">
                             <div className="flex items-center gap-1">
@@ -944,9 +886,7 @@ export default function CombinedCategoriesPage() {
                         )}
                       </div>
 
-                      {/* Contenu du produit */}
                       <div className="p-4 space-y-3">
-                        {/* Titre et rating */}
                         <div className="space-y-2">
                           <h3 className="font-semibold text-gray-900 line-clamp-2 leading-tight text-sm">
                             {product.name}
@@ -960,7 +900,6 @@ export default function CombinedCategoriesPage() {
                           </div>
                         </div>
 
-                        {/* Prix et CTA */}
                         <div className="flex items-center justify-between pt-1">
                           <div className="flex items-baseline gap-2">
                             {product.discount > 0 ? (
@@ -994,9 +933,7 @@ export default function CombinedCategoriesPage() {
                   ))}
                 </div>
 
-                {/* Composant de Pagination */}
                 <div className="flex justify-between items-center space-x-2 mt-8">
-                  {/* Bouton Précédent */}
                   <button
                     onClick={() => handlePageChange(currentPage - 1)}
                     disabled={currentPage === 1}
@@ -1010,7 +947,6 @@ export default function CombinedCategoriesPage() {
                     Previous
                   </button>
 
-                  {/* Première page */}
                   {getPageNumbers()[0] > 1 && (
                     <>
                       <button
@@ -1029,7 +965,6 @@ export default function CombinedCategoriesPage() {
                     </>
                   )}
 
-                  {/* Pages numérotées */}
                   <div className="flex items-center gap-2">
                     {getPageNumbers().map((page) => (
                       <button
@@ -1046,7 +981,6 @@ export default function CombinedCategoriesPage() {
                     ))}
                   </div>
 
-                  {/* Dernière page */}
                   {getPageNumbers()[getPageNumbers().length - 1] <
                     totalPages && (
                     <>
@@ -1067,7 +1001,6 @@ export default function CombinedCategoriesPage() {
                     </>
                   )}
 
-                  {/* Bouton Suivant */}
                   <button
                     onClick={() => handlePageChange(currentPage + 1)}
                     disabled={currentPage === totalPages}

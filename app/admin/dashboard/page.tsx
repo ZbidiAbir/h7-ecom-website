@@ -149,7 +149,7 @@ export default function AnalyticsPage() {
       {/* Enhanced Header with Time Range Filter */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
-          <h1 className="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-gray-600 to-gray-00 bg-clip-text text-transparent">
+          <h1 className="text-2xl sm:text-3xl font-bold  bg-clip-text text-transparent">
             Analytics Dashboard
           </h1>
           <p className="text-gray-600 mt-1 text-sm sm:text-base">
@@ -236,7 +236,7 @@ export default function AnalyticsPage() {
                   data={productsChartData}
                   cx="50%"
                   cy="50%"
-                  labelLine={false}
+                  labelLine={true}
                   label={({ name, percentage }) => `${name} (${percentage}%)`}
                   outerRadius={120}
                   innerRadius={70}
@@ -265,15 +265,6 @@ export default function AnalyticsPage() {
                   verticalAlign="middle"
                   align="right"
                   wrapperStyle={{ right: -20 }}
-                  formatter={(value, entry: any) => (
-                    <span className="text-sm text-gray-600 flex items-center gap-2">
-                      <div
-                        className="w-3 h-3 rounded-full"
-                        style={{ backgroundColor: entry.color }}
-                      />
-                      {value}
-                    </span>
-                  )}
                 />
               </PieChart>
             </ResponsiveContainer>
@@ -379,7 +370,7 @@ export default function AnalyticsPage() {
       </div>
 
       {/* Quick Stats Footer */}
-      <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-2xl p-6 border">
+      <div className=" rounded-2xl p-6 border">
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
           <StatItem label="Avg. Order Value" value="$124.50" />
           <StatItem label="Customer Satisfaction" value="4.8/5" />
@@ -409,7 +400,7 @@ function MetricCard({
 }) {
   if (loading) {
     return (
-      <Card className="relative overflow-hidden transition-all duration-200 hover:shadow-lg border-0 bg-gradient-to-br from-gray-50 to-gray-100">
+      <Card className="relative overflow-hidden transition-all duration-200 hover:shadow-lg border-0-100">
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
           <Skeleton className="h-4 w-32" />
           <Skeleton className="h-6 w-6 rounded-full" />
@@ -426,8 +417,8 @@ function MetricCard({
   }
 
   return (
-    <Card className="relative overflow-hidden transition-all duration-300 hover:shadow-lg hover:scale-[1.02] border-0 bg-gradient-to-br from-white to-gray-50/50 group">
-      <div className="absolute inset-0 bg-gradient-to-br from-blue-500/5 to-purple-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+    <Card className="relative overflow-hidden transition-all duration-300 hover:shadow-lg hover:scale-[1.02] border-0 from-white to-gray-50/50 group">
+      <div className="absolute inset-0 from-blue-500/5 to-purple-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
 
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 relative z-10">
         <CardTitle className="text-sm font-medium text-gray-600">
@@ -510,9 +501,7 @@ function BreakdownCard({
       <CardHeader>
         <CardTitle className="text-lg font-semibold">{title}</CardTitle>
         {description && (
-          <p className="text-sm  text-gray-900 dark:text-gray-100 mt-1">
-            {description}
-          </p>
+          <p className="text-sm  text-gray-900  mt-1">{description}</p>
         )}
       </CardHeader>
       <CardContent className="space-y-4">
@@ -525,7 +514,7 @@ function BreakdownCard({
                     {item.icon}
                   </span>
                 )}
-                <span className="font-medium text-gray-900 dark:text-gray-100 text-sm">
+                <span className="font-medium text-gray-900  text-sm">
                   {item.label}
                 </span>
               </div>

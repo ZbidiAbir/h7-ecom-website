@@ -18,21 +18,11 @@ import {
 import { Eye } from "lucide-react";
 import ImageUpload from "@/components/image-upload";
 
-interface CategoryColor {
-  id: string;
-  color: string;
-}
-
-interface CategorySize {
-  id: string;
-  size: string;
-}
-
 interface Category {
   id: string;
   name: string;
-  colors?: CategoryColor[];
-  sizes?: CategorySize[];
+  colors?: { id: string; color: string }[];
+  sizes?: { id: string; size: string }[];
 }
 
 export default function CreateProductPage() {
@@ -51,14 +41,14 @@ export default function CreateProductPage() {
     price: "",
     discount: "",
     categoryId: "",
-    color: "",
-    size: "",
+    colors: [] as string[],
+    sizes: [] as string[],
     inStock: true,
     stock: 0,
     images: [] as string[],
   });
 
-  // Charger les catégories
+  // Charger les catégories AVEC leurs couleurs et tailles
   useEffect(() => {
     const fetchCategories = async () => {
       try {
@@ -76,19 +66,7 @@ export default function CreateProductPage() {
     fetchCategories();
   }, []);
 
-  // Lorsqu'on sélectionne une catégorie
-  const handleCategoryChange = (value: string) => {
-    const category = categories.find((cat) => cat.id === value) || null;
-    setSelectedCategory(category);
-    setForm((prev) => ({
-      ...prev,
-      categoryId: value,
-      color: "",
-      size: "",
-    }));
-  };
-
-  // Gestion des inputs texte
+  // AJOUT: Gestion des inputs texte
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
@@ -96,7 +74,39 @@ export default function CreateProductPage() {
     setForm((prev) => ({ ...prev, [name]: value }));
   };
 
-  // CORRECTION : Gestion des images
+  // Lorsqu'on sélectionne une catégorie
+  const handleCategoryChange = (value: string) => {
+    const category = categories.find((cat) => cat.id === value) || null;
+    setSelectedCategory(category);
+    setForm((prev) => ({
+      ...prev,
+      categoryId: value,
+      colors: [],
+      sizes: [],
+    }));
+  };
+
+  // Gestion des couleurs (sélection multiple)
+  const handleColorChange = (color: string) => {
+    setForm((prev) => ({
+      ...prev,
+      colors: prev.colors.includes(color)
+        ? prev.colors.filter((c) => c !== color)
+        : [...prev.colors, color],
+    }));
+  };
+
+  // Gestion des tailles (sélection multiple)
+  const handleSizeChange = (size: string) => {
+    setForm((prev) => ({
+      ...prev,
+      sizes: prev.sizes.includes(size)
+        ? prev.sizes.filter((s) => s !== size)
+        : [...prev.sizes, size],
+    }));
+  };
+
+  // Gestion des images
   const handleAddImage = (url: string) => {
     setForm((prev) => ({
       ...prev,
@@ -126,8 +136,8 @@ export default function CreateProductPage() {
       price: parseFloat(form.price),
       discount: form.discount ? parseFloat(form.discount) : 0,
       categoryId: form.categoryId,
-      colors: form.color ? [form.color] : [],
-      sizes: form.size ? [form.size] : [],
+      colors: form.colors,
+      sizes: form.sizes,
       inStock: form.inStock,
       stock: form.stock,
       images: form.images,
@@ -264,59 +274,77 @@ export default function CreateProductPage() {
                   </div>
                 </div>
 
-                {/* CORRECTION : Couleurs (Select) */}
+                {/* Couleurs (Checkboxes) */}
                 {selectedCategory?.colors &&
                   selectedCategory.colors.length > 0 && (
                     <div className="space-y-2">
-                      <Label htmlFor="color">Couleur</Label>
-                      <Select
-                        value={form.color}
-                        onValueChange={(value) =>
-                          setForm((prev) => ({ ...prev, color: value }))
-                        }
-                      >
-                        <SelectTrigger>
-                          <SelectValue placeholder="Sélectionner une couleur" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {selectedCategory.colors.map((color) => (
-                            <SelectItem key={color.id} value={color.color}>
-                              <div className="flex items-center gap-2">
-                                <div
-                                  className="w-4 h-4 rounded-full border"
-                                  style={{ backgroundColor: color.color }}
-                                />
-                                {color.color}
-                              </div>
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
+                      <Label>Couleurs disponibles</Label>
+                      <div className="grid grid-cols-2 gap-2">
+                        {selectedCategory.colors.map((colorObj) => (
+                          <div
+                            key={colorObj.id}
+                            className="flex items-center space-x-2"
+                          >
+                            <input
+                              type="checkbox"
+                              id={`color-${colorObj.id}`}
+                              checked={form.colors.includes(colorObj.color)}
+                              onChange={() => handleColorChange(colorObj.color)}
+                              className="rounded border-gray-300"
+                            />
+                            <Label
+                              htmlFor={`color-${colorObj.id}`}
+                              className="flex items-center gap-2 cursor-pointer"
+                            >
+                              <div
+                                className="w-4 h-4 rounded-full border"
+                                style={{ backgroundColor: colorObj.color }}
+                              />
+                              {colorObj.color}
+                            </Label>
+                          </div>
+                        ))}
+                      </div>
+                      {form.colors.length > 0 && (
+                        <p className="text-sm text-green-600">
+                          {form.colors.length} couleur(s) sélectionnée(s)
+                        </p>
+                      )}
                     </div>
                   )}
 
-                {/* CORRECTION : Tailles (Select) */}
+                {/* Tailles (Checkboxes) */}
                 {selectedCategory?.sizes &&
                   selectedCategory.sizes.length > 0 && (
                     <div className="space-y-2">
-                      <Label htmlFor="size">Taille</Label>
-                      <Select
-                        value={form.size}
-                        onValueChange={(value) =>
-                          setForm((prev) => ({ ...prev, size: value }))
-                        }
-                      >
-                        <SelectTrigger>
-                          <SelectValue placeholder="Sélectionner une taille" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {selectedCategory.sizes.map((size) => (
-                            <SelectItem key={size.id} value={size.size}>
-                              {size.size}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
+                      <Label>Tailles disponibles</Label>
+                      <div className="grid grid-cols-3 gap-2">
+                        {selectedCategory.sizes.map((sizeObj) => (
+                          <div
+                            key={sizeObj.id}
+                            className="flex items-center space-x-2"
+                          >
+                            <input
+                              type="checkbox"
+                              id={`size-${sizeObj.id}`}
+                              checked={form.sizes.includes(sizeObj.size)}
+                              onChange={() => handleSizeChange(sizeObj.size)}
+                              className="rounded border-gray-300"
+                            />
+                            <Label
+                              htmlFor={`size-${sizeObj.id}`}
+                              className="cursor-pointer"
+                            >
+                              {sizeObj.size}
+                            </Label>
+                          </div>
+                        ))}
+                      </div>
+                      {form.sizes.length > 0 && (
+                        <p className="text-sm text-green-600">
+                          {form.sizes.length} taille(s) sélectionnée(s)
+                        </p>
+                      )}
                     </div>
                   )}
 
@@ -417,24 +445,44 @@ export default function CreateProductPage() {
                     {selectedCategory?.name || "N/A"}
                   </p>
 
-                  <div className="flex items-center gap-2">
-                    <strong>Couleur:</strong>
-                    {form.color ? (
-                      <div className="flex items-center gap-2">
-                        <div
-                          className="w-4 h-4 rounded-full border"
-                          style={{ backgroundColor: form.color }}
-                        />
-                        <span>{form.color}</span>
+                  {/* Affichage des couleurs sélectionnées */}
+                  <div>
+                    <strong>Couleurs:</strong>
+                    {form.colors.length > 0 ? (
+                      <div className="flex flex-wrap gap-2 mt-1">
+                        {form.colors.map((color, index) => (
+                          <div key={index} className="flex items-center gap-1">
+                            <div
+                              className="w-4 h-4 rounded-full border"
+                              style={{ backgroundColor: color }}
+                            />
+                            <span>{color}</span>
+                          </div>
+                        ))}
                       </div>
                     ) : (
-                      <span className="text-muted-foreground">N/A</span>
+                      <span className="text-muted-foreground ml-2">Aucune</span>
                     )}
                   </div>
 
-                  <p>
-                    <strong>Taille:</strong> {form.size || "N/A"}
-                  </p>
+                  {/* Affichage des tailles sélectionnées */}
+                  <div>
+                    <strong>Tailles:</strong>
+                    {form.sizes.length > 0 ? (
+                      <div className="flex flex-wrap gap-2 mt-1">
+                        {form.sizes.map((size, index) => (
+                          <span
+                            key={index}
+                            className="px-2 py-1 bg-gray-100 rounded"
+                          >
+                            {size}
+                          </span>
+                        ))}
+                      </div>
+                    ) : (
+                      <span className="text-muted-foreground ml-2">Aucune</span>
+                    )}
+                  </div>
 
                   <p>
                     <strong>Stock:</strong> {form.stock} unités •{" "}
