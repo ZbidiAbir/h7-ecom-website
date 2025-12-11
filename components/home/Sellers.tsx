@@ -60,7 +60,7 @@ const SlideContent = memo(({ slide, isActive, direction }: SlideProps) => {
       }`}
     >
       {/* Images Container - Modifié pour aligner les images au même niveau */}
-      <div className="flex gap-4 md:gap-8 justify-center items-center relative">
+      <div className="flex gap-4 md:gap-24 justify-center items-center relative">
         {slide.images.map((img, index) => (
           <div
             key={`${slide.id}-${index}`}
@@ -184,21 +184,18 @@ export default function BestSellersLookbook() {
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
     >
-      {/* Background Elements */}
       <div className="absolute inset-0">
         <div className="absolute top-0 left-0 w-72 h-72 bg-blue-900/5 rounded-full mix-blend-screen filter blur-3xl animate-pulse"></div>
         <div className="absolute bottom-0 right-0 w-96 h-96 bg-purple-900/5 rounded-full mix-blend-screen filter blur-3xl animate-pulse delay-1000"></div>
       </div>
 
       <div className="max-w-7xl mx-auto relative z-10">
-        {/* Header Section */}
         <div className="text-center mb-16">
-          <h2 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-6 tracking-tight">
+          <h2 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-6 text-start tracking-tight">
             Best sellers lookbook of the month{" "}
           </h2>
         </div>
 
-        {/* Main Carousel */}
         <div
           ref={containerRef}
           className="relative flex items-center justify-center min-h-[800px] lg:min-h-[700px] mx-auto"
@@ -206,16 +203,14 @@ export default function BestSellersLookbook() {
           onTouchMove={onTouchMove}
           onTouchEnd={onTouchEnd}
         >
-          {/* Navigation Buttons */}
           <button
             onClick={prevSlide}
-            className="absolute left-2 md:left-4 lg:left-8 z-20 bg-white/10 hover:bg-white/20 backdrop-blur-lg text-white p-4 rounded-full transition-all duration-300 hover:scale-110 focus:outline-none focus:ring-2 focus:ring-white/50  shadow-2xl"
+            className="absolute left-2 md:left-4 lg:left-8 z-20  text-white p-4 rounded-full transition-all duration-300 hover:scale-110 focus:outline-none focus:ring-2 focus:ring-white/50  shadow-2xl"
             aria-label="Previous slide"
           >
             <ChevronLeft size={32} />
           </button>
 
-          {/* Slides Container */}
           <div className="relative w-full h-full flex items-center justify-center">
             {SLIDES.map((slide, index) => (
               <SlideContent
@@ -227,10 +222,9 @@ export default function BestSellersLookbook() {
             ))}
           </div>
 
-          {/* Next Button */}
           <button
             onClick={nextSlide}
-            className="absolute right-2 md:right-4 lg:right-8 z-20 bg-white/10 hover:bg-white/20 backdrop-blur-lg text-white p-4 rounded-full transition-all duration-300 hover:scale-110 focus:outline-none focus:ring-2 focus:ring-white/50shadow-2xl"
+            className="absolute right-2 md:right-4 lg:right-8 z-20  text-white p-4 rounded-full transition-all duration-300 hover:scale-110 focus:outline-none focus:ring-2 focus:ring-white/50shadow-2xl"
             aria-label="Next slide"
           >
             <ChevronRight size={32} />
@@ -238,7 +232,6 @@ export default function BestSellersLookbook() {
         </div>
       </div>
 
-      {/* Custom Animations */}
       <style jsx>{`
         @keyframes slide-in-right {
           from {

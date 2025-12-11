@@ -2,7 +2,12 @@
 
 import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import { Abel } from "next/font/google";
 
+const abel = Abel({
+  weight: "400",
+  subsets: ["latin"],
+});
 const images = ["/home/h1.png", "/home/h2.png", "/home/h3.png"]; // 👉 remplace avec tes propres images dans public/
 
 export default function HeroSection() {
@@ -35,19 +40,31 @@ export default function HeroSection() {
       <div className="absolute inset-0 bg-black/40" />
 
       {/* Image absolute à droite */}
-      <div className="absolute left-10 top-1/2 transform -translate-y-1/2 z-20">
-        <img
-          src="/home/new.svg" // 👉 remplace par le chemin de ton image
-          alt="Image décorative"
-          className="w-16 h-full object-cover " // 👉 ajuste la taille et le style selon tes besoins
-        />
+      <div
+        className={`absolute text-4xl left-10 bottom-24 transform -translate-y-1/2 z-20 ${abel.className}`}
+      >
+        <p>Don’t blink.</p>
+        <p>
+          New <span className="font-semibold">HASHSEVEN</span> pieces are coming
+        </p>
+        <p>be here to grab the fire first.</p>
       </div>
 
       {/* Contenu centré */}
-      <div className="relative z-10 flex flex-col items-center justify-center h-full text-center text-white pt-64">
-        <button className="bg-black px-8 py-3 font-semibold cursor-pointer">
-          Discover the collection{" "}
-        </button>
+      <div className="relative z-10 flex flex-col items-center  h-full text-center text-black pt-36">
+        <p className={`p-4 text-6xl font-bold ${abel.className}`}>
+          MADE FOR STREET AND LUXURY{" "}
+          <span className="text-black font-bold">FASHION</span>
+        </p>
+        <div className="uppercase flex items-center gap-4">
+          {" "}
+          <button className="bg-black px-8 py-3 font-semibold cursor-pointer text-white rounded-lg">
+            SHOP NOW !{" "}
+          </button>
+          <button className="bg-white uppercase px-8 py-3 font-semibold cursor-pointer text-black rounded-lg">
+            Explore ALL
+          </button>
+        </div>
       </div>
     </section>
   );

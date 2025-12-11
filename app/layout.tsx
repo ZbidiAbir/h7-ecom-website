@@ -18,14 +18,11 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body
-        className={""} // <-- relative ici
-      >
+      <body className={""}>
         <ThemeProviders>
           <Providers>
             <CartProvider>
               {" "}
-              {/* <-- padding pour ne pas cacher le contenu */}
               {children}
               <FooterWrapper />
             </CartProvider>
