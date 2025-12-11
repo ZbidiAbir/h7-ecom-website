@@ -17,6 +17,7 @@ import ShippingSection from "@/components/home/ShippingSection";
 import AutoScrollBanner from "@/components/home/AutoScrollBanner";
 import MadeInTunisia from "@/components/home/MadeInTunisia";
 import About from "@/components/home/About";
+import VisitorTracker from "./admin/dashboard/visitors/components/VisitorTracker";
 
 export default function Home() {
   const { data: session } = useSession();
@@ -121,6 +122,8 @@ export default function Home() {
       <Hero />
       <Features />
       <Sellers />
+      <VisitorTracker />
+
       <main className="px-4 py-8 md:py-12">
         <div className="px-36">
           {loading ? (

@@ -24,8 +24,7 @@ export default function RootLayout({
         <ThemeProviders>
           <Providers>
             <CartProvider>
-              <VisitorTracker />
-              <VisitorCount /> {children}
+              {children}
               <FooterWrapper />
             </CartProvider>
           </Providers>
