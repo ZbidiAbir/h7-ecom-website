@@ -5,6 +5,8 @@ import { CartProvider } from "./hooks/useCart";
 
 import FooterWrapper from "@/components/FooterWrapper";
 import { ThemeProviders } from "./admin/dashboard/components/providers";
+import VisitorTracker from "./admin/dashboard/visitors/components/VisitorTracker";
+import VisitorCount from "./admin/dashboard/visitors/components/VisitorCount";
 
 export const metadata: Metadata = {
   title: "HASHSEVEN",
@@ -22,8 +24,8 @@ export default function RootLayout({
         <ThemeProviders>
           <Providers>
             <CartProvider>
-              {" "}
-              {children}
+              <VisitorTracker />
+              <VisitorCount /> {children}
               <FooterWrapper />
             </CartProvider>
           </Providers>

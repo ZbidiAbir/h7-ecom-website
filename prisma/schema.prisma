@@ -285,3 +285,10 @@ model Notification {
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   createdAt DateTime @default(now())
 }
+
+model Visitor {
+  id        String   @id @default(cuid())
+  ip        String
+  userAgent String?
+  visitedAt DateTime @default(now())
+}
